@@ -13,16 +13,35 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Table(name = "transactions")
+@Getter
+@Setter
 public class Transaction {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    private boolean archived = false;
+    
+    public Transaction() {}
+      
+    public Transaction(User owner, LocalDateTime operationTime, BigDecimal amount, TransactionType type) {
+        super();
+        this.owner = owner;
+        this.operationTime = operationTime;
+        this.amount = amount;
+        this.type = type;
+    }
+
     @ManyToOne
-    private Wallet wallet;
+    private User owner;
     
     @NotNull
     @Column(nullable = false)

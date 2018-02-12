@@ -11,22 +11,33 @@ import javax.persistence.OneToMany;
 
 import org.hibernate.validator.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
+@Getter
+@Setter
 public class Competition {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
+    @JsonIgnore
+    private boolean visible = true;
+    
     @NotBlank
     private String name;
     
     @ManyToOne
-    private GeoScope scope;
+    private Scope scope;
     
     @ManyToOne
     private Sport sport;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "competition")
     private Set<Game> games;
     

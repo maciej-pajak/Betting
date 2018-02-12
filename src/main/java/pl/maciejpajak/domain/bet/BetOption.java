@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class BetOption {
 
@@ -16,11 +18,17 @@ public class BetOption {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
+    @JsonIgnore
+    private boolean visible =  true;
+    
+    @JsonIgnore
     private String winCondition;
     
+    @JsonIgnore
     @ManyToOne
     private Bet bet;
     
+    @JsonIgnore
     @OneToMany(mappedBy = "betOption")
     private Set<Odd> odds;
     

@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import javax.persistence.DiscriminatorColumn;
-import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import lombok.Getter;
+import lombok.Setter;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
@@ -23,11 +23,15 @@ import pl.maciejpajak.domain.user.User;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "coupon_type")
+@Getter
+@Setter
 public class Coupon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
+    
+    protected boolean archived;
     
     protected LocalDateTime created;
     
@@ -35,11 +39,11 @@ public class Coupon {
     protected Set<PlacedBet> placedBets;
     
     @ManyToOne
-    private User owner;
+    protected User owner;
     
     @OneToOne
-    private Transaction ownerTransaction;
+    protected Transaction ownerTransaction;
     
-    private boolean resolved;
+    protected boolean resolved;
     
 }

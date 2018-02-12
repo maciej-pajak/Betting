@@ -22,22 +22,25 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
     
     @Autowired
     private RoleRepository roleRepo;
+   
     
     @Override
     public void onApplicationEvent(ApplicationReadyEvent arg0) {
-        System.out.println("App has started!");
-        Role r = new Role();
-        r.setName("ROLE_USER");
-        r = roleRepo.save(r);
-        Set<Role> roles = new HashSet<>();
-        roles.add(r);
+//        System.out.println("App has started!");
+//        Role r = new Role();
+//        r.setName("ROLE_USER");
+//        r = roleRepo.save(r);
+//        Set<Role> roles = new HashSet<>();
+//        roles.add(r);
+//        
+//        BCryptPasswordEncoder e = new BCryptPasswordEncoder();
+//        User u = new User();
+//        u.setLogin("user");
+//        u.setPassword(e.encode("user"));
+//        u.setRoles(roles);
+//        userRepo.save(u);
         
-        BCryptPasswordEncoder e = new BCryptPasswordEncoder();
-        User u = new User();
-        u.setLogin("user");
-        u.setPassword(e.encode("user"));
-        u.setRoles(roles);
-        userRepo.save(u);
+//        subRepo.findOne(1L);
         
     }
 

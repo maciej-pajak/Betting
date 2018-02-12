@@ -1,6 +1,7 @@
-package pl.maciejpajak.domain.bet;
+package pl.maciejpajak.domain.offers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,26 +9,26 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
-import pl.maciejpajak.domain.coupon.Coupon;
+import pl.maciejpajak.domain.user.User;
 
 @Entity
-public class PlacedBet {
+public class SpecialOffer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
+    private Long id;
     
-    private boolean archived;
+    private boolean archived = false;
     
-    @OneToOne
-    @JoinColumn(name = "odd_id")
-    private Odd odd;
+    private LocalDateTime endDate;
     
-    private BigDecimal amount; // TODO
+    private boolean valid;
+    
+    private BigDecimal bonus;
     
     @ManyToOne
-    private Coupon coupon;
+    @JoinColumn(name = "user_id")
+    private User user;
     
 }

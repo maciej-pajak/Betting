@@ -19,7 +19,7 @@ public class CurrentUser extends org.springframework.security.core.userdetails.U
             User user) {
         super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         this.user = user;
-        System.out.println("Creating new CurrentUser");
+        System.out.println("Creating new CurrentUser"); // TODO remove
     }
 
     public User getUser() {

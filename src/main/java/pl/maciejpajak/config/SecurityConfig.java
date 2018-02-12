@@ -17,7 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import pl.maciejpajak.security.UserDetailServiceImpl;
 
 @Configuration
-@EnableWebSecurity
+//@EnableWebSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled=true)  // TODO
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     
@@ -42,25 +42,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // TODO
         http.
             authorizeRequests()
-//                .antMatchers("/").permitAll()
-                .antMatchers("/login").permitAll()
-                .antMatchers("/register").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ADMIN")
-                .antMatchers("/**").hasAnyAuthority("USER", "ADMIN")
-                .anyRequest().authenticated()
-                .and().csrf().disable()
-                .formLogin()
-//                    .loginPage("/login")
-//                    .failureUrl("/login?error=true")
-                .defaultSuccessUrl("/", true)
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .and()
-                .logout()
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                    .logoutSuccessUrl("/")
-                .and().exceptionHandling()
-                .accessDeniedPage("/access-denied");
+                .antMatchers("/").permitAll();
+//                .antMatchers("/login").permitAll()
+//                .antMatchers("/register").permitAll()
+//                .antMatchers("/admin/**").hasAuthority("ADMIN")
+//                .antMatchers("/**").hasAnyAuthority("USER", "ADMIN")
+//                .anyRequest().authenticated()
+//                .and().csrf().disable()
+//                .formLogin()
+////                    .loginPage("/login")
+////                    .failureUrl("/login?error=true")
+//                .defaultSuccessUrl("/", true)
+//                .usernameParameter("email")
+//                .passwordParameter("password")
+//                .and()
+//                .logout()
+//                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+//                    .logoutSuccessUrl("/")
+//                .and().exceptionHandling()
+//                .accessDeniedPage("/access-denied");
     }
     
     @Override

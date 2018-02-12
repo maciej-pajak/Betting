@@ -8,6 +8,6 @@ import pl.maciejpajak.domain.user.User;
 
 public interface UserRepository extends JpaRepository<User, Long>{
 
-    Optional<User> findOneByLoginOrEmailEquals(String login, String email);
-    
+    Optional<User> findOneByLoginOrEmailEquals(String login, String email); // TODO and visible = true
+    Optional<User> findOneById(Long id); // TODO and visible = true
 }

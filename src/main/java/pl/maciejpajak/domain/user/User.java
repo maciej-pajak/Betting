@@ -1,30 +1,41 @@
 package pl.maciejpajak.domain.user;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
+import lombok.Getter;
+import lombok.Setter;
 import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
+import pl.maciejpajak.domain.offers.SpecialOffer;
 import pl.maciejpajak.security.Role;
 
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    private boolean archived = false;
     
     @Email
     @Column(unique = true)
@@ -36,9 +47,6 @@ public class User {
     
     @NotBlank
     private String password;
-    
-//    @OneToOne(optional = false) // TODO
-//    private Wallet wallet;
     
 //    @ManyToMany
 //    private Set<Friends> friends;
@@ -55,39 +63,12 @@ public class User {
     @ManyToMany
     private Set<Role> roles;
     
+    @OneToMany(mappedBy = "user")
+    private Set<SpecialOffer> specialOffers;
     
-    // getters & setters
+    private BigDecimal balance;
     
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }    
+    @OneToMany(mappedBy = "owner")
+    private Set<Transaction> transactions;
     
 }

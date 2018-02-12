@@ -18,6 +18,8 @@ public class CouponInvitation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
+    private boolean archived;
+    
     @ManyToOne
     private GroupCoupon groupCoupon;
     
