@@ -2,6 +2,7 @@ package pl.maciejpajak.api;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -16,6 +17,7 @@ import pl.maciejpajak.api.dto.BetOptionWithOddDto;
 import pl.maciejpajak.api.dto.PlacedCouponDto;
 import pl.maciejpajak.api.dto.PlacedGroupCouponDto;
 import pl.maciejpajak.api.temp.CouponService;
+import pl.maciejpajak.domain.coupon.UserCoupon;
 
 @RestController
 @RequestMapping("/coupons")
@@ -44,15 +46,18 @@ public class CouponApi {
         return c;
     }
     
+    @GetMapping("/all")
+    public Collection<UserCoupon> findAllCoupons() {
+        return couponService.findAllForCurrentUser();
+    }
+    
     @PostMapping("/create")
-    public void createCoupon(@RequestBody @Valid PlacedCouponDto couponDto) throws Exception {
-        System.out.println("REG=====>" + couponDto.getClass() + " " + (couponDto instanceof PlacedCouponDto));
+    public void createCoupon(@RequestBody @Valid PlacedCouponDto couponDto) {
         couponService.createCoupon(couponDto);
     }
     
     @PostMapping("/group/create")
-    public void createGroupCoupon(@RequestBody @Valid PlacedGroupCouponDto couponDto) throws Exception {
-        System.out.println("GROUP=====>" + couponDto.getClass() + " " + (couponDto instanceof PlacedCouponDto));
+    public void createGroupCoupon(@RequestBody @Valid PlacedGroupCouponDto couponDto) {
         couponService.createCoupon(couponDto);
     }
 

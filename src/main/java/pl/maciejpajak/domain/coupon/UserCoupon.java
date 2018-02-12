@@ -14,6 +14,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,13 +26,29 @@ import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @DiscriminatorColumn(name = "coupon_type")
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserCoupon extends Coupon {
+public class UserCoupon {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    protected Long id;
+
+    protected boolean visible;
+
+    protected LocalDateTime created;
+
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.PERSIST)
+    protected Set<PlacedBet> placedBets;
+
+    @ManyToOne
+    protected User owner;
+
+    @OneToOne
+    protected Transaction ownerTransaction;
+
+    protected boolean resolved;
+
 }

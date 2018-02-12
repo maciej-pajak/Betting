@@ -1,8 +1,7 @@
 package pl.maciejpajak.api.temp;
 
-import static org.assertj.core.api.Assertions.useRepresentation;
-
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,9 +17,9 @@ import pl.maciejpajak.api.dto.PlacedGroupCouponDto;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.bet.Odd;
 import pl.maciejpajak.domain.bet.PlacedBet;
-import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
+import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
@@ -59,41 +58,32 @@ public class CouponService {
         this.groupCouponRepository = groupCouponRepository;
     }
     
+    public Collection<UserCoupon> findAllForCurrentUser() {
+        Long userId = 1L; // TODO change to current user
+        return couponRepository.findAllByOwnerIdAndVisible(userId, true);
+    }
+    
     @Transactional
     public void createCoupon(PlacedCouponDto couponDto) {
         Long userId = 1L; // TODO change to current user
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));
 
-        Transaction transaction = processCouponTransaction(couponDto, user);
+        GroupCoupon coupon = new GroupCoupon(LocalDateTime.now(),
+                prepareAndValidateBets(couponDto),
+                user,
+                createCouponTransaction(couponDto, user));
         
-        Set<PlacedBet> placedBets = prepareAndValidateBets(couponDto);
+        coupon.getPlacedBets().forEach(pb -> pb.setCoupon(coupon));
         
-        UserCoupon coupon = UserCoupon.builder()
-                .created(LocalDateTime.now())
-                .owner(user)
-                .ownerTransaction(transaction)
-                .placedBets(placedBets)
-                .resolved(false)
-                .visible(true)
-                .build();
-        
-        placedBets.forEach(pb -> pb.setCoupon(coupon));
-        
-        System.out.println("========================");
-        System.out.println("couponDto instanceof PlacedCouponDto: " + (couponDto instanceof PlacedCouponDto));
-        System.out.println("couponDto instanceof PlacedGroupCouponDto: " + (couponDto instanceof PlacedGroupCouponDto));
-        if (couponDto instanceof PlacedCouponDto) {
-            processCoupon(coupon);
-        } else if (couponDto instanceof PlacedGroupCouponDto) {
-            processGroupCoupon((GroupCoupon) coupon, (PlacedGroupCouponDto) couponDto);
+        if (couponDto instanceof PlacedGroupCouponDto) {
+            sendInvitations(coupon, (PlacedGroupCouponDto) couponDto);
+            groupCouponRepository.saveAndFlush(coupon);
+        } else {
+            couponRepository.saveAndFlush((UserCoupon) coupon);
         }
     }
-    
-    private void processCoupon(UserCoupon coupon) {
-        couponRepository.saveAndFlush(coupon);
-    }
-    
-    private void processGroupCoupon(GroupCoupon coupon, PlacedGroupCouponDto groupCouponDto) {
+
+    private void sendInvitations(GroupCoupon coupon, PlacedGroupCouponDto groupCouponDto) {
         List<Long> invitedIds = groupCouponDto.getInvitedUsersIds();
         if (invitedIds.size() == 0) {
             throw new RuntimeException(); // TODO define exception
@@ -116,7 +106,7 @@ public class CouponService {
         groupCouponRepository.saveAndFlush(coupon);
     }
        
-    private Transaction processCouponTransaction(PlacedCouponDto couponDto, User user) {
+    private Transaction createCouponTransaction(PlacedCouponDto couponDto, User user) {
         if(user.getBalance().compareTo(couponDto.getAmount()) < 0) {
             throw new InsufficientFundsException();
         }
