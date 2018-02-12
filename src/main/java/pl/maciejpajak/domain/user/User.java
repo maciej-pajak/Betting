@@ -20,7 +20,7 @@ import org.hibernate.validator.constraints.NotBlank;
 
 import lombok.Getter;
 import lombok.Setter;
-import pl.maciejpajak.domain.coupon.Coupon;
+import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.offers.SpecialOffer;
 import pl.maciejpajak.security.Role;
@@ -55,7 +55,7 @@ public class User {
 //    private Set<PrivateMessage> messages;
     
     @OneToMany(mappedBy = "owner")
-    private Set<Coupon> coupons;
+    private Set<UserCoupon> coupons;
     
     @OneToMany(mappedBy = "invitedUser")
     private Set<CouponInvitation> couponInvitations;

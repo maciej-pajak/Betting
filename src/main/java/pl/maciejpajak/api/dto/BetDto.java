@@ -1,18 +1,20 @@
 package pl.maciejpajak.api.dto;
 
-import javax.validation.constraints.Min;
+import java.util.Set;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import pl.maciejpajak.domain.bet.BetOption;
 
 @Getter
 @Setter
+@Builder
 public class BetDto {
 
-    @Min(1L)
-    private Long oddId;
-    
-    @Min(1L)
-    private Long betOptionId;
+    private Long id;
+    private Long gameId;
+    private Set<BetOption> betOptions;
+    private String description;
     
 }

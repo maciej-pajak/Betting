@@ -8,25 +8,29 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
 
 @Entity
+@Getter
+@Setter
+@Builder
 public class CouponInvitation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
-    private boolean archived;
+    private boolean visible;
     
     @ManyToOne
     private GroupCoupon groupCoupon;
     
     @ManyToOne
     private User invitedUser;
-    
-    private boolean accepted; // TODO maybe transaction is enough
     
     @OneToOne
     @JoinColumn(name = "bet_transaction_id")

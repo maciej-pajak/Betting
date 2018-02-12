@@ -2,6 +2,8 @@ package pl.maciejpajak.domain.bet;
 
 import java.util.Set;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -23,12 +25,14 @@ public class Bet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Access(AccessType.PROPERTY) // TODO check
     protected Long id;
     
     @JsonIgnore
     private boolean visible = true;
     
     @ManyToOne
+    @JsonIgnore(value = false)
     private Game game;
     
     @OneToMany(mappedBy = "bet", fetch = FetchType.EAGER)

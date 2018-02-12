@@ -42,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // TODO
         http.
             authorizeRequests()
-                .antMatchers("/").permitAll();
+                .antMatchers("/").permitAll().and().csrf().disable();
 //                .antMatchers("/login").permitAll()
 //                .antMatchers("/register").permitAll()
 //                .antMatchers("/admin/**").hasAuthority("ADMIN")

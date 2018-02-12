@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,23 +23,14 @@ import lombok.Setter;
 @Table(name = "transactions")
 @Getter
 @Setter
+@Builder
 public class Transaction {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private boolean archived = false;
-    
-    public Transaction() {}
-      
-    public Transaction(User owner, LocalDateTime operationTime, BigDecimal amount, TransactionType type) {
-        super();
-        this.owner = owner;
-        this.operationTime = operationTime;
-        this.amount = amount;
-        this.type = type;
-    }
+    private boolean visible = true;
 
     @ManyToOne
     private User owner;

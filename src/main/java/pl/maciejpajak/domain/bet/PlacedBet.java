@@ -8,26 +8,42 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
-import pl.maciejpajak.domain.coupon.Coupon;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import pl.maciejpajak.domain.coupon.UserCoupon;
 
 @Entity
+@Getter
+@Setter
+@Builder
 public class PlacedBet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
     
-    private boolean archived;
+    @JsonIgnore
+    private boolean visible;
     
-    @OneToOne
+//    @ManyToOne
+//    @JoinColumn(name = "bet_id")
+//    private Bet bet;
+    
+    @ManyToOne
+    @JoinColumn(name = "bet_option_id")
+    private BetOption betOption;
+    
+    @ManyToOne
     @JoinColumn(name = "odd_id")
     private Odd odd;
     
-    private BigDecimal amount; // TODO
-    
+    @JsonIgnore
     @ManyToOne
-    private Coupon coupon;
+    @JoinColumn(name = "coupon_id")
+    private UserCoupon coupon;
     
 }

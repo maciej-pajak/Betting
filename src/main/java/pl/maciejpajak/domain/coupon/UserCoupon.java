@@ -15,7 +15,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.user.Transaction;
@@ -26,25 +29,9 @@ import pl.maciejpajak.domain.user.User;
 @DiscriminatorColumn(name = "coupon_type")
 @Getter
 @Setter
-public abstract class Coupon {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
-
-    protected boolean visible;
-
-    protected LocalDateTime created;
-
-    @OneToMany(mappedBy = "coupon", cascade = CascadeType.PERSIST)
-    protected Set<PlacedBet> placedBets;
-
-    @ManyToOne
-    protected User owner;
-
-    @OneToOne
-    protected Transaction ownerTransaction;
-
-    protected boolean resolved;
-
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserCoupon extends Coupon {
+    
 }

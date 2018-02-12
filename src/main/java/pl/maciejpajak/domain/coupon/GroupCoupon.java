@@ -2,13 +2,19 @@ package pl.maciejpajak.domain.coupon;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-@Entity
-public class GroupCoupon extends Coupon {
+import lombok.Getter;
+import lombok.Setter;
 
-    @OneToMany(mappedBy = "groupCoupon")
+@Entity
+@Getter
+@Setter
+public class GroupCoupon extends UserCoupon {
+
+    @OneToMany(mappedBy = "groupCoupon", cascade =CascadeType.PERSIST)
     private Set<CouponInvitation> intivations;
     
 }
