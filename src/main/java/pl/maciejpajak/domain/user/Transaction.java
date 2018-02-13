@@ -43,8 +43,8 @@ public class Transaction {
     
     private BigDecimal amount;
     
-    @ManyToOne
-    @JoinColumn(name = "type_id")
+//    @ManyToOne
+//    @JoinColumn(name = "type_id")
     private TransactionType type;
 
 }
