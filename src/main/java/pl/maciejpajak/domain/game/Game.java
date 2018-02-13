@@ -1,7 +1,6 @@
 package pl.maciejpajak.domain.game;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -13,13 +12,15 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.Setter;
-import pl.maciejpajak.domain.bet.Odd;
+import pl.maciejpajak.domain.game.score.GameScore;
 import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.domain.game.util.ScoreType;
 
 @Entity
 @Getter
@@ -53,5 +54,11 @@ public class Game {
     
     @OneToMany(mappedBy = "game")
     private Set<GamePart> gameParts;
+    
+    @Enumerated(EnumType.STRING)
+    private ScoreType scoreType;
+    
+    @OneToOne
+    private GameScore gameFinalScore;
     
 }

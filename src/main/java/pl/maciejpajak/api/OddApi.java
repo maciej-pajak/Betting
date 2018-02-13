@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.domain.bet.Odd;
+import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.OddRepository;
 
 @RestController
@@ -21,9 +22,8 @@ public class OddApi {
     }
 
     @GetMapping("/{betOptionId}")
-    public Odd getNewestOddByBetId(@PathVariable(name = "betOptionId", required = true) Long betOptionId) throws Exception {
-        // TODO exeption
-        return oddRepository.findFirstByBetOptionIdOrderByCreatedDesc(betOptionId).orElseThrow(() -> new Exception());
+    public Odd getNewestOddByBetId(@PathVariable(name = "betOptionId", required = true) Long betOptionId) {
+        return oddRepository.findFirstByBetOptionIdOrderByCreatedDesc(betOptionId).orElseThrow(() -> new BaseEntityNotFoundException(betOptionId));
     }
     
 }

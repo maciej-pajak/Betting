@@ -16,6 +16,9 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     public Collection<Game> findAllByCompetitionIdAndVisible(Long competitionId, boolean isVisible);
     public Collection<Game> findAllByStatusInAndVisible(Collection<GameStatus> statuses, boolean isVisible);
     
+    public Collection<Game> findAllByStatusAndVisible(GameStatus status, boolean isVisible);
+    public Collection<Game> findAllByStatusAndCompetitionIdAndVisible(GameStatus status, Long competitionId, boolean isVisible);
+    
 //    public Collection<Game> findAllByCompetitionId(Long competitionId);
 
 }

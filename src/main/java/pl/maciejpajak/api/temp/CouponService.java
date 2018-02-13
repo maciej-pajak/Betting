@@ -157,6 +157,7 @@ public class CouponService {
         // validate if bets can be combined (only one bet option from each bet)
         Set<Long> betsIds = new HashSet<>();
         placedBets.forEach(pb -> {
+            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX about ot get id");
             Long id = pb.getBetOption().getBet().getId();
             if (betsIds.contains(id)) {
                 throw new BetsCombinationNotAllowedException(); // TODO add message
@@ -167,4 +168,9 @@ public class CouponService {
         
         return placedBets;
     }
+    
+//    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amou) {
+//        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
+//        
+//    }
 }

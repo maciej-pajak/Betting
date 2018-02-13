@@ -25,7 +25,7 @@ public class Bet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Access(AccessType.PROPERTY) // TODO check
+    @Access(AccessType.PROPERTY)
     protected Long id;
     
     @JsonIgnore

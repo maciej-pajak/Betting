@@ -8,29 +8,42 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import pl.maciejpajak.api.temp.GameService;
 import pl.maciejpajak.domain.game.Game;
+import pl.maciejpajak.domain.game.score.GameScore;
+import pl.maciejpajak.domain.game.score.PartScore;
 import pl.maciejpajak.domain.game.util.GameStatus;
-import pl.maciejpajak.repository.GameRepository;
 
 @RestController
 @RequestMapping("/games")
 public class GameApi {
     
-    private final GameRepository gameRepository;
+    private final GameService gameService;
     
-    public GameApi(GameRepository gameRepository) {
-        this.gameRepository = gameRepository;
+    public GameApi(GameService gameService) {
+        this.gameService = gameService;
     }
     
-    @GetMapping("/{id}")
-    private Game getGameById(@PathVariable(name = "id", required = true) Long id) throws Exception {
-        return gameRepository.findOneByIdAndVisible(id, true).orElseThrow(() -> new Exception()); // TODO cusotm exception and handle
+    @GetMapping("/{gameId}")
+    private Game getGameById(@PathVariable(name = "gameId", required = true) Long gameId) {
+        return gameService.findOneById(gameId);
     }
     
-//    @GetMapping("/live")
-//    private Collection<Game> getAllLiveGamesByCompetition(@RequestParam(name = "competitionId") Long competitionId) {
-//        
-//    }
+    @GetMapping("/{gameId}/latest-score")
+    private GameScore getLatestGameScore(@PathVariable(name = "gameId", required = true) Long gameId) {
+        return gameService.findLatestGameScoreByGameId(gameId);
+    }
+    
+    @GetMapping("/{gameId}/latest-part-score")
+    private PartScore getLatestPartScore(@PathVariable(name = "gameId", required = true) Long gameId,
+            @RequestParam(name = "partId", required =  false) Long partId) {
+        return gameService.findLatestPartScore(gameId, partId);
+    }
+    
+    @GetMapping("/live")
+    private Collection<Game> getAllLiveGamesByCompetition(@RequestParam(name = "competitionId", required = false) Long competitionId) {
+        return gameService.getAllLiveGamesByCompetition(competitionId);
+    }
     
     @GetMapping("/all")
     private Collection<Game> getAllGames(
@@ -38,9 +51,9 @@ public class GameApi {
             @RequestParam(name = "competitionId", required = false) Long competitionId) {
         
         if (competitionId == null) {
-            return gameRepository.findAllByVisible(true);
+            return gameService.findAll();
         } else {
-            return gameRepository.findAllByCompetitionIdAndVisible(competitionId, true);
+            return gameService.findAllByCompetitionId(competitionId);
         }
     }
 
