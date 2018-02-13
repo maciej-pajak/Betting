@@ -64,30 +64,10 @@ public class CouponService {
     }
     
     public Collection<CouponShowDto> findAllForCurrentUser(Long userId) {
-        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(convertUserCouponToDto).collect(Collectors.toList());
+        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
-    private Function<PlacedBet, PlacedBetShowDto> convertPlacedBetToDto = 
-            pb -> PlacedBetShowDto.builder()
-                .id(pb.getId())
-                .betOptionId(pb.getBetOption().getId())
-                .betOptionDescription(pb.getBetOption().getDescription())
-                .oddId(pb.getOdd().getId())
-                .oddValue(pb.getOdd().getValue())
-                .build();
-                
-            
-    private Function<UserCoupon, CouponShowDto> convertUserCouponToDto = 
-            c -> CouponShowDto.builder()
-                .id(c.getId())
-                .created(c.getCreated())
-                .ownerId(c.getOwner().getId())
-                .status(c.getStatus())
-                .prize(c.getPrize())
-                .placedBets(c.getPlacedBets().stream().map(convertPlacedBetToDto).collect(Collectors.toSet()))
-                .bonus(c.getBonus())
-                .totalPrize(c.getTotalPrize())
-                .build();
+    
                 
     
     @Transactional
