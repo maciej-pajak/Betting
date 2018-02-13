@@ -23,6 +23,8 @@ import lombok.Setter;
 @Table(name = "transactions")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Transaction {
     

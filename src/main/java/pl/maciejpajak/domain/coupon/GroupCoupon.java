@@ -18,8 +18,11 @@ import pl.maciejpajak.domain.user.User;
 @Setter
 public class GroupCoupon extends UserCoupon {
 
+    
     @OneToMany(mappedBy = "groupCoupon", cascade = CascadeType.PERSIST)
     private Set<CouponInvitation> intivations;
+    
+    public GroupCoupon() {}
     
     public GroupCoupon(LocalDateTime created, Set<PlacedBet> placedBets, User owner, Transaction ownerTransaction) {
         super();

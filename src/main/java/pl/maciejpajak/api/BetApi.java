@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.api.dto.BetDto;
 import pl.maciejpajak.api.temp.BetService;
-import pl.maciejpajak.repository.BetRepository;
 
 @RestController
 @RequestMapping("/bets")
@@ -24,8 +23,7 @@ public class BetApi {
     }
     
     @GetMapping("/{betId}")
-    private BetDto getBetById(@PathVariable(name = "betId", required = true) Long betId) throws Exception {
-        // TODO exception
+    private BetDto getBetById(@PathVariable(name = "betId", required = true) Long betId) {
         return betService.findOneById(betId);
     }
 

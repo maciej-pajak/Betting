@@ -1,5 +1,6 @@
 package pl.maciejpajak.api.temp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -71,7 +72,7 @@ public class CouponService {
         GroupCoupon coupon = new GroupCoupon(LocalDateTime.now(),
                 prepareAndValidateBets(couponDto),
                 user,
-                createCouponTransaction(couponDto, user));
+                createTransaction(couponDto.getAmount(), user));
         
         coupon.getPlacedBets().forEach(pb -> pb.setCoupon(coupon));
         
@@ -106,14 +107,14 @@ public class CouponService {
         groupCouponRepository.saveAndFlush(coupon);
     }
        
-    private Transaction createCouponTransaction(PlacedCouponDto couponDto, User user) {
-        if(user.getBalance().compareTo(couponDto.getAmount()) < 0) {
+    private Transaction createTransaction(BigDecimal amount, User user) {
+        if(user.getBalance().compareTo(amount) < 0) {
             throw new InsufficientFundsException();
         }
         
         Transaction transaction = 
                 Transaction.builder()
-                    .amount(couponDto.getAmount())
+                    .amount(amount)
                     .operationTime(LocalDateTime.now())
                     .owner(user)
                     .visible(true)
@@ -123,7 +124,7 @@ public class CouponService {
         // save transaction
         transactionRepository.saveAndFlush(transaction);
         // set user balance
-        user.setBalance(user.getBalance().subtract(couponDto.getAmount()));
+        user.setBalance(user.getBalance().subtract(amount));
         userRepository.saveAndFlush(user);
         return transaction;
     }
@@ -169,8 +170,8 @@ public class CouponService {
         return placedBets;
     }
     
-//    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amou) {
-//        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        
-//    }
+    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amou) {
+        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
+        
+    }
 }

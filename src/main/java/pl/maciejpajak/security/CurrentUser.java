@@ -11,27 +11,25 @@ public class CurrentUser extends org.springframework.security.core.userdetails.U
 
     private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
     
-    private User user;
+    private Long id;
     
-    public CurrentUser(String username, String password, boolean enabled, boolean accountNonExpired,
-            boolean credentialsNonExpired, boolean accountNonLocked,
-            Collection<? extends GrantedAuthority> authorities,
-            User user) {
-        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
-        this.user = user;
-        System.out.println("Creating new CurrentUser"); // TODO remove
+    public CurrentUser(String username, String password,
+            Collection<? extends GrantedAuthority> authorities, Long userId) {
+        super(username, password, true, true, true, true, authorities);
+        this.id = userId;
     }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+    
+//    public CurrentUser(String username, String password, boolean enabled, boolean accountNonExpired,
+//            boolean credentialsNonExpired, boolean accountNonLocked,
+//            Collection<? extends GrantedAuthority> authorities,
+//            Long id) {
+//        super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
+//        
+//        System.out.println("Creating new CurrentUser"); // TODO remove
+//    }
 
     public Long getId() {
-        return user.getId();
+        return this.id;
     }
 
     public static long getSerialversionuid() {

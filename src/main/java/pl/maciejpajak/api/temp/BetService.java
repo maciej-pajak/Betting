@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import pl.maciejpajak.api.dto.BetDto;
 import pl.maciejpajak.domain.bet.Bet;
+import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.BetRepository;
 
 @Service
@@ -17,13 +18,11 @@ public class BetService {
     @Autowired
     private BetRepository betRepository;
 
-    public BetDto findOneById(Long betId) throws Exception {
-        // TODO exception
-        
+    public BetDto findOneById(Long betId) {
         return convertToDto.apply(
                 betRepository
                     .findOneByIdAndVisible(betId, true)
-                    .orElseThrow(() -> new Exception()));
+                    .orElseThrow(() -> new BaseEntityNotFoundException(betId)));
     }
     
     public Collection<BetDto> findAllByGameIdAndVisible(Long gameId) {

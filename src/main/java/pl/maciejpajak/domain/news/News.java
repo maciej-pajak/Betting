@@ -15,7 +15,7 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private boolean archived = false;
+    private boolean visible = true;
 
     private String content;
     

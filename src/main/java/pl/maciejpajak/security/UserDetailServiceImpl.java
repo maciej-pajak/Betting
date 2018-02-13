@@ -31,20 +31,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
         for (Role role : u.getRoles()) {
             grantedAuthorities.add(new SimpleGrantedAuthority(role.getName()));
         }
-        // TODO remove
-        System.out.println("===================================");
-        System.out.println(u);
-        System.out.println(u.getLogin());
-        System.out.println(u.getId());
-        System.out.println("===================================");
-        return new CurrentUser(u.getLogin(),
-                u.getPassword(),
-                true,
-                true,
-                true,
-                true,
-                grantedAuthorities,
-                u);
+        System.out.println("======================");
+        System.out.println(u.getPassword());
+        System.out.println(u.getEmail());
+        return new CurrentUser(u.getEmail(), u.getPassword(), grantedAuthorities, u.getId());
     }
 
 }

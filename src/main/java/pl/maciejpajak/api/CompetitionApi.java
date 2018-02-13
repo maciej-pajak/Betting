@@ -8,37 +8,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import pl.maciejpajak.api.temp.CompetitionService;
 import pl.maciejpajak.domain.game.Competition;
-import pl.maciejpajak.repository.CompetitionRepository;
 
 @RestController
 @RequestMapping("/competitions")
 public class CompetitionApi {
     
-    private final CompetitionRepository competitionRepository;
+    private final CompetitionService competitionService;
     
     @Autowired
-    public CompetitionApi(CompetitionRepository competitonRepository) {
-        this.competitionRepository = competitonRepository;
+    public CompetitionApi(CompetitionService competitionService) {
+        this.competitionService = competitionService;
     }
 
     @GetMapping("/all")
-    private Collection<Competition> getAllCompetitions(
+    public Collection<Competition> getAllCompetitions(
             @RequestParam(name = "sportId", required = false) Long sportId,
             @RequestParam(name = "scopeId", required = false) Long scopeId) {
-        
-        boolean isSportNull = sportId == null;
-        boolean isScopeNull = scopeId == null;
-        
-        if (isSportNull && isScopeNull) {
-            return competitionRepository.findAllByVisible(true);
-        } else if (isSportNull) {
-            return competitionRepository.findAllByScopeIdAndVisible(scopeId, true);
-        } else if (isScopeNull) {
-            return competitionRepository.findAllBySportIdAndVisible(sportId, true);
-        } else {
-            return competitionRepository.findAllBySportIdAndScopeIdAndVisible(sportId, scopeId, true);
-        }
+        return competitionService.findAllCompetitions(sportId, scopeId);
     }
-
+    
 }
