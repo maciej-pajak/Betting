@@ -26,8 +26,8 @@ import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@DiscriminatorColumn(name = "coupon_type")
+//@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+//@DiscriminatorColumn(name = "coupon_type")
 @Getter
 @Setter
 public class UserCoupon {

@@ -17,7 +17,7 @@ public abstract class Preference {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    private boolean archived = false;
+    private boolean visible = true;
     
     @ManyToOne
     @JoinColumn(name = "user_id")
