@@ -1,6 +1,7 @@
 package pl.maciejpajak.domain.bet;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -39,12 +40,12 @@ public class PlacedBet {
     @JoinColumn(name = "bet_option_id")
     private BetOption betOption;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "odd_id")
     private Odd odd;
     
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
     private UserCoupon coupon;
     

@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -13,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import pl.maciejpajak.api.dto.BetOptionWithOddDto;
-import pl.maciejpajak.api.dto.PlacedCouponDto;
-import pl.maciejpajak.api.dto.PlacedGroupCouponDto;
+import pl.maciejpajak.api.dto.CouponPlaceDto;
+import pl.maciejpajak.api.dto.CouponShowDto;
+import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
+import pl.maciejpajak.api.dto.PlacedBetShowDto;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.bet.Odd;
 import pl.maciejpajak.domain.bet.PlacedBet;
@@ -59,13 +63,35 @@ public class CouponService {
         this.groupCouponRepository = groupCouponRepository;
     }
     
-    public Collection<UserCoupon> findAllForCurrentUser() {
-        Long userId = 1L; // TODO change to current user
-        return couponRepository.findAllByOwnerIdAndVisible(userId, true);
+    public Collection<CouponShowDto> findAllForCurrentUser(Long userId) {
+        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(convertUserCouponToDto).collect(Collectors.toList());
     }
     
+    private Function<PlacedBet, PlacedBetShowDto> convertPlacedBetToDto = 
+            pb -> PlacedBetShowDto.builder()
+                .id(pb.getId())
+                .betOptionId(pb.getBetOption().getId())
+                .betOptionDescription(pb.getBetOption().getDescription())
+                .oddId(pb.getOdd().getId())
+                .oddValue(pb.getOdd().getValue())
+                .build();
+                
+            
+    private Function<UserCoupon, CouponShowDto> convertUserCouponToDto = 
+            c -> CouponShowDto.builder()
+                .id(c.getId())
+                .created(c.getCreated())
+                .ownerId(c.getOwner().getId())
+                .status(c.getStatus())
+                .prize(c.getPrize())
+                .placedBets(c.getPlacedBets().stream().map(convertPlacedBetToDto).collect(Collectors.toSet()))
+                .bonus(c.getBonus())
+                .totalPrize(c.getTotalPrize())
+                .build();
+                
+    
     @Transactional
-    public void createCoupon(PlacedCouponDto couponDto) {
+    public void createCoupon(CouponPlaceDto couponDto) {
         Long userId = 1L; // TODO change to current user
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));
 
@@ -76,15 +102,15 @@ public class CouponService {
         
         coupon.getPlacedBets().forEach(pb -> pb.setCoupon(coupon));
         
-        if (couponDto instanceof PlacedGroupCouponDto) {
-            sendInvitations(coupon, (PlacedGroupCouponDto) couponDto);
+        if (couponDto instanceof GroupCouponPlaceDto) {
+            sendInvitations(coupon, (GroupCouponPlaceDto) couponDto);
             groupCouponRepository.saveAndFlush(coupon);
         } else {
             couponRepository.saveAndFlush((UserCoupon) coupon);
         }
     }
 
-    private void sendInvitations(GroupCoupon coupon, PlacedGroupCouponDto groupCouponDto) {
+    private void sendInvitations(GroupCoupon coupon, GroupCouponPlaceDto groupCouponDto) {
         List<Long> invitedIds = groupCouponDto.getInvitedUsersIds();
         if (invitedIds.size() == 0) {
             throw new RuntimeException(); // TODO define exception
@@ -129,7 +155,7 @@ public class CouponService {
         return transaction;
     }
     
-    private Set<PlacedBet> prepareAndValidateBets(PlacedCouponDto couponDto) {
+    private Set<PlacedBet> prepareAndValidateBets(CouponPlaceDto couponDto) {
         Set<PlacedBet> placedBets = new HashSet<>();
         
         // prepare single bets list with odds

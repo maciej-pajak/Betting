@@ -2,9 +2,12 @@ package pl.maciejpajak.api.temp;
 
 import java.util.Collection;
 
+import org.springframework.stereotype.Service;
+
 import pl.maciejpajak.domain.game.Competition;
 import pl.maciejpajak.repository.CompetitionRepository;
 
+@Service
 public class CompetitionService {
     
     private final CompetitionRepository competitionRepository;

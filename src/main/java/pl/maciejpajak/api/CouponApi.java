@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.api.dto.BetOptionWithOddDto;
-import pl.maciejpajak.api.dto.PlacedCouponDto;
-import pl.maciejpajak.api.dto.PlacedGroupCouponDto;
+import pl.maciejpajak.api.dto.CouponPlaceDto;
+import pl.maciejpajak.api.dto.CouponShowDto;
+import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
 import pl.maciejpajak.api.temp.CouponService;
-import pl.maciejpajak.domain.coupon.UserCoupon;
+import pl.maciejpajak.security.CurrentUser;
 
 @RestController
 @RequestMapping("/coupons")
@@ -31,8 +33,8 @@ public class CouponApi {
 
     // TODO remove
     @GetMapping("/test")
-    public PlacedCouponDto test() {
-        PlacedCouponDto c = new PlacedCouponDto();
+    public CouponPlaceDto test() {
+        CouponPlaceDto c = new CouponPlaceDto();
         c.setAmount(BigDecimal.valueOf(100.33));
         c.setOddsChangeAccepted(true);
         
@@ -47,17 +49,17 @@ public class CouponApi {
     }
     
     @GetMapping("/all")
-    public Collection<UserCoupon> findAllCoupons() {
-        return couponService.findAllForCurrentUser();
+    public Collection<CouponShowDto> findAllCoupons(@AuthenticationPrincipal CurrentUser user) {
+        return couponService.findAllForCurrentUser(user.getId());
     }
     
     @PostMapping("/create")
-    public void createCoupon(@RequestBody @Valid PlacedCouponDto couponDto) {
+    public void createCoupon(@RequestBody @Valid CouponPlaceDto couponDto) {
         couponService.createCoupon(couponDto);
     }
     
     @PostMapping("/group/create")
-    public void createGroupCoupon(@RequestBody @Valid PlacedGroupCouponDto couponDto) {
+    public void createGroupCoupon(@RequestBody @Valid GroupCouponPlaceDto couponDto) {
         couponService.createCoupon(couponDto);
     }
 

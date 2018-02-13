@@ -1,5 +1,6 @@
 package pl.maciejpajak.domain.coupon;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -16,12 +17,10 @@ import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,6 +33,9 @@ import pl.maciejpajak.domain.user.User;
 @DiscriminatorColumn(name = "coupon_type")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserCoupon {
     
     @Id
@@ -56,6 +58,11 @@ public class UserCoupon {
     @Enumerated(EnumType.STRING)
     protected CouponStatus status;
     
+    protected BigDecimal prize;
+    
+    protected BigDecimal bonus;
+    
+    protected BigDecimal totalPrize;
     
 
 }

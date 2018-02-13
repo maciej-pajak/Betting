@@ -30,7 +30,7 @@ public class GroupCoupon extends UserCoupon {
         this.placedBets = placedBets;
         this.owner = owner;
         this.ownerTransaction = ownerTransaction;
-        this.resolved = false;
+        this.status = CouponStatus.UNRESOLVED;
         this.visible = true;
     }
     

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PlacedGroupCouponDto extends PlacedCouponDto {
+public class GroupCouponPlaceDto extends CouponPlaceDto {
 
     private List<Long> invitedUsersIds;
     

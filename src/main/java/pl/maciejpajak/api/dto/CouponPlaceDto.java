@@ -12,7 +12,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PlacedCouponDto {
+public class CouponPlaceDto {
     
     @DecimalMin(value = "1.00")
     private BigDecimal amount;
