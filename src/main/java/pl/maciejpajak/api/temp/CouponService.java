@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -18,25 +17,23 @@ import pl.maciejpajak.api.dto.BetOptionWithOddDto;
 import pl.maciejpajak.api.dto.CouponPlaceDto;
 import pl.maciejpajak.api.dto.CouponShowDto;
 import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
-import pl.maciejpajak.api.dto.PlacedBetShowDto;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.bet.Odd;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.coupon.UserCoupon;
-import pl.maciejpajak.domain.user.Transaction;
+import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.exception.BetsCombinationNotAllowedException;
-import pl.maciejpajak.exception.InsufficientFundsException;
 import pl.maciejpajak.exception.OddHasChangedException;
 import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.CouponRepository;
 import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.OddRepository;
-import pl.maciejpajak.repository.TransactionRepository;
 import pl.maciejpajak.repository.UserRepository;
+import pl.maciejpajak.service.TransactionService;
 
 @Service
 public class CouponService {
@@ -46,20 +43,20 @@ public class CouponService {
     private final OddRepository oddRepository;
     private final BetOptionRepository betOptionRepository;
     private final UserRepository userRepository;
-    private final TransactionRepository transactionRepository;
+    private final TransactionService transactionService;
     
     @Autowired
     public CouponService(CouponRepository couponRepository,
             OddRepository oddRepository,
             BetOptionRepository betOptionRepository,
             UserRepository userRepository,
-            TransactionRepository transactionRepository,
+            TransactionService transactionService,
             GroupCouponRepository groupCouponRepository) {
         this.couponRepository = couponRepository;
         this.oddRepository = oddRepository;
         this.betOptionRepository = betOptionRepository;
         this.userRepository = userRepository;
-        this.transactionRepository = transactionRepository;
+        this.transactionService = transactionService;
         this.groupCouponRepository = groupCouponRepository;
     }
     
@@ -67,21 +64,17 @@ public class CouponService {
         return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
-    
-                
-    
     @Transactional
-    public void createCoupon(CouponPlaceDto couponDto) {
-        Long userId = 1L; // TODO change to current user
+    public void createCoupon(CouponPlaceDto couponDto, Long userId) {
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));
 
         GroupCoupon coupon = new GroupCoupon(LocalDateTime.now(),
                 prepareAndValidateBets(couponDto),
                 user,
-                createTransaction(couponDto.getAmount(), user));
+                transactionService.createTransaction(couponDto.getAmount(), user, TransactionType.PLACE_BET));
         
         coupon.getPlacedBets().forEach(pb -> pb.setCoupon(coupon));
-        
+        // TODO add total value
         if (couponDto instanceof GroupCouponPlaceDto) {
             sendInvitations(coupon, (GroupCouponPlaceDto) couponDto);
             groupCouponRepository.saveAndFlush(coupon);
@@ -92,11 +85,11 @@ public class CouponService {
 
     private void sendInvitations(GroupCoupon coupon, GroupCouponPlaceDto groupCouponDto) {
         List<Long> invitedIds = groupCouponDto.getInvitedUsersIds();
-        if (invitedIds.size() == 0) {
-            throw new RuntimeException(); // TODO define exception
+        if (invitedIds.isEmpty()) {
+            return;
         }
         Set<CouponInvitation> invitations = new HashSet<>();
-        // TODO handle duplicated ids
+        
         for (Long id : invitedIds) {
             if (id.equals(coupon.getOwner().getId())) {
                 throw new RuntimeException(); // TODO define exception - user cannot invite himself
@@ -110,30 +103,9 @@ public class CouponService {
                     );
         }
         coupon.setIntivations(invitations);
-        groupCouponRepository.saveAndFlush(coupon);
     }
        
-    private Transaction createTransaction(BigDecimal amount, User user) {
-        if(user.getBalance().compareTo(amount) < 0) {
-            throw new InsufficientFundsException();
-        }
-        
-        Transaction transaction = 
-                Transaction.builder()
-                    .amount(amount)
-                    .operationTime(LocalDateTime.now())
-                    .owner(user)
-                    .visible(true)
-//                    .type(type)   // TODO add transactoinType
-                    .build();
-        
-        // save transaction
-        transactionRepository.saveAndFlush(transaction);
-        // set user balance
-        user.setBalance(user.getBalance().subtract(amount));
-        userRepository.saveAndFlush(user);
-        return transaction;
-    }
+    
     
     private Set<PlacedBet> prepareAndValidateBets(CouponPlaceDto couponDto) {
         Set<PlacedBet> placedBets = new HashSet<>();

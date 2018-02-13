@@ -2,15 +2,21 @@ package pl.maciejpajak.api;
 
 import java.util.Collection;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import pl.maciejpajak.api.dto.AcceptCouponInvitationDto;
 import pl.maciejpajak.api.temp.CouponInvitationService;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
+import pl.maciejpajak.security.CurrentUser;
 
 @RestController
 @RequestMapping("/coupon-invitations")
@@ -29,16 +35,14 @@ public class CouponInvitationApi {
         return couponInvitationService.findbyId(id);
     }
     
-    @GetMapping("/user/pending") // TODO add current user
-    public Collection<CouponInvitation> getPendingCouponInvitations() {
-        return couponInvitationService.findAllPending();
+    @GetMapping("/user/pending")
+    public Collection<CouponInvitation> getPendingCouponInvitations(@AuthenticationPrincipal CurrentUser principal) {
+        return couponInvitationService.findAllPending(principal.getId());
     }
     
-    // TODO check access
-    @PostMapping("/user/accept/{couponId}")
-    public ResponseEntity acceptCouponInvitation(Long couponId) {
-        Long userId = 1L;   // TODO change to current user
-        
+    @PostMapping("/user/accept")
+    public ResponseEntity acceptCouponInvitation(@RequestBody @Valid AcceptCouponInvitationDto invitationDto, @AuthenticationPrincipal CurrentUser principal) {
+        couponInvitationService.acceptCouponInvitation(invitationDto, principal.getId());
         return ResponseEntity.ok().build(); // TODO update this
     }
 

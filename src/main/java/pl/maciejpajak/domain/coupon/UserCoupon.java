@@ -58,7 +58,7 @@ public class UserCoupon {
     @Enumerated(EnumType.STRING)
     protected CouponStatus status;
     
-    protected BigDecimal prize;
+    protected BigDecimal value;
     
     protected BigDecimal bonus;
     

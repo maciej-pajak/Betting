@@ -54,13 +54,13 @@ public class CouponApi {
     }
     
     @PostMapping("/create")
-    public void createCoupon(@RequestBody @Valid CouponPlaceDto couponDto) {
-        couponService.createCoupon(couponDto);
+    public void createCoupon(@RequestBody @Valid CouponPlaceDto couponDto, @AuthenticationPrincipal CurrentUser principal) {
+        couponService.createCoupon(couponDto, principal.getId());
     }
     
     @PostMapping("/group/create")
-    public void createGroupCoupon(@RequestBody @Valid GroupCouponPlaceDto couponDto) {
-        couponService.createCoupon(couponDto);
+    public void createGroupCoupon(@RequestBody @Valid GroupCouponPlaceDto couponDto, @AuthenticationPrincipal CurrentUser principal) {
+        couponService.createCoupon(couponDto, principal.getId());
     }
 
 }

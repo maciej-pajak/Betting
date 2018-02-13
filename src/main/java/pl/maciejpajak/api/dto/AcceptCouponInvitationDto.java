@@ -2,6 +2,9 @@ package pl.maciejpajak.api.dto;
 
 import java.math.BigDecimal;
 
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Min;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +12,10 @@ import lombok.Setter;
 @Setter
 public class AcceptCouponInvitationDto {
     
+    @Min(value = 1L)
     private Long couponInvitationId;
+    
+    @DecimalMin(value = "1.00")
     private BigDecimal amount;
 
 }

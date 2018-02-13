@@ -28,7 +28,7 @@ public final class DtoMappers {
                 .created(c.getCreated())
                 .ownerId(c.getOwner().getId())
                 .status(c.getStatus())
-                .prize(c.getPrize())
+                .value(c.getValue())
                 .placedBets(c.getPlacedBets().stream().map(convertPlacedBetToDto).collect(Collectors.toSet()))
                 .bonus(c.getBonus())
                 .totalPrize(c.getTotalPrize())

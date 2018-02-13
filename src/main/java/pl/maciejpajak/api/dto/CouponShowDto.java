@@ -19,7 +19,7 @@ public class CouponShowDto {
     private Set<PlacedBetShowDto> placedBets;
     private Long ownerId;
     private CouponStatus status;
-    private BigDecimal prize;
+    private BigDecimal value;
     private BigDecimal bonus;
     private BigDecimal totalPrize;
     
