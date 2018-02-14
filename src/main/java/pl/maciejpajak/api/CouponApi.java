@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.api.dto.BetOptionWithOddDto;
@@ -56,6 +57,27 @@ public class CouponApi {
         return couponService.findAllForCurrentUser(id);
     }
     
+    @GetMapping("/all-individual")
+    public Collection<CouponShowDto> findAllIndividualCoupons(@AuthenticationPrincipal CurrentUser user) {
+        return couponService.findAllIndividualCoupons(user.getId());
+    }
+    
+    @GetMapping("/all-group")
+    public Collection<CouponShowDto> findAllGroupCoupons(@AuthenticationPrincipal CurrentUser user) {
+        return couponService.findAllGroupCoupons(user.getId());
+    }
+    
+    @GetMapping("/all-group/owned-only")
+    public Collection<CouponShowDto> findOwnedGroupCoupons(@AuthenticationPrincipal CurrentUser user) {
+        return couponService.findOwnedGroupCoupons(user.getId());
+    }
+    
+    @GetMapping("/all-group/invited-only")
+    public Collection<CouponShowDto> findInvitedGroupCoupons(@AuthenticationPrincipal CurrentUser user) {
+        return couponService.findInvitedGroupCoupons(user.getId());
+    }
+    
+
     @PostMapping("/create")
     public void createCoupon(@RequestBody @Valid CouponPlaceDto couponDto, @AuthenticationPrincipal CurrentUser principal) {
         couponService.createCoupon(couponDto, principal.getId());

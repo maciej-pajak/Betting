@@ -60,10 +60,27 @@ public class CouponService {
         this.groupCouponRepository = groupCouponRepository;
     }
     
+    // TODO remove
     public Collection<CouponShowDto> findAllForCurrentUser(Long userId) {
-        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
+        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream()
+                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
+    public Collection<CouponShowDto> findAllIndividualCoupons(Long userId) {
+        
+    }
+    
+    public Collection<CouponShowDto> findAllGroupCoupons(Long userId) {
+        
+    }
+    
+    public Collection<CouponShowDto> findOwnedGroupCoupons(Long userId) {
+        
+    }
+    
+    public Collection<CouponShowDto> findInvitedGroupCoupons(Long userId) {
+        
+    }
 //    public CouponShowDto findOneById(Long id) {
 //        UserCoupon userCoupon = couponRepository.findOneByIdAndVisible(id, true)
 //                .orElseThrow(() -> new BaseEntityNotFoundException(userId));

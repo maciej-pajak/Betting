@@ -18,7 +18,9 @@ public class CouponShowDto {
     private LocalDateTime created;
     private Set<PlacedBetShowDto> placedBets;
     private Long ownerId;
+    private BigDecimal ownerTransactionAmount;
     private CouponStatus status;
+    private Set<CouponInvitationShowDto> invitations;
     private BigDecimal value;
     private BigDecimal bonus;
     private BigDecimal totalPrize;
