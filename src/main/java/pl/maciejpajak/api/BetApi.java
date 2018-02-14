@@ -28,8 +28,8 @@ public class BetApi {
     }
 
     @GetMapping("/by-game/{gameId}")
-    private Collection<BetDto> getBetsByGame(@PathVariable(name = "gameId", required = true) Long gameId) {
-        return betService.findAllByGameIdAndVisible(gameId);
+    private Collection<BetDto> getBetableBetsByGame(@PathVariable(name = "gameId", required = true) Long gameId) {
+        return betService.findAllBetableByGameIdAndVisible(gameId);
     }
     
 }

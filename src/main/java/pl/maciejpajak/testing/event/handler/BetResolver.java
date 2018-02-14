@@ -3,6 +3,7 @@ package pl.maciejpajak.testing.event.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,16 +16,18 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.GamePart;
+import pl.maciejpajak.domain.game.util.BetLastCall;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.BetOptionRepository;
+import pl.maciejpajak.repository.BetRepository;
 import pl.maciejpajak.repository.GameRepository;
-import pl.maciejpajak.testing.event.event.GameEvent;
 
 @Component
 public class BetResolver {
@@ -36,11 +39,26 @@ public class BetResolver {
    
     @Autowired
     private BetOptionRepository betOptionRepository;
+    
+    @Autowired
+    private BetRepository betRepository;
 
-    @EventListener
-    public void handleGameEndEvent(GameEvent gameEndEvent) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
+//    @EventListener
+//    public void handleGameEndEvent(GameEvent gameEndEvent) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
+//        
+//        resolveBetOptions(gameEndEvent.getEventDto().getGameId());
+//    }
+    
+    @Async
+    public void resolve(Game game, BetLastCall lastCall) {
+        // make best with lastCall unbetable
+        Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(game.getId(), lastCall, true);
+        bets.stream().forEach(b -> b.setBetable(false));
+        betRepository.save(bets);
         
-        resolveBetOptions(gameEndEvent.getEventDto().getGameId());
+        // resolve and
+        // update each bet option with bet option status
+            // update all coupons with specific bet option
     }
     
     @Transactional

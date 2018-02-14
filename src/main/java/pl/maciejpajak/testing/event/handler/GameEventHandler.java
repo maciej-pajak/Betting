@@ -1,6 +1,7 @@
 package pl.maciejpajak.testing.event.handler;
 
 import java.time.Duration;
+import java.util.Collection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,15 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.GamePart;
 import pl.maciejpajak.domain.game.score.GameScore;
 import pl.maciejpajak.domain.game.score.PartScore;
+import pl.maciejpajak.domain.game.util.BetLastCall;
 import pl.maciejpajak.domain.game.util.EventType;
 import pl.maciejpajak.domain.game.util.GameResult;
 import pl.maciejpajak.domain.game.util.GameStatus;
 import pl.maciejpajak.domain.game.util.ScoreType;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
+import pl.maciejpajak.repository.BetRepository;
 import pl.maciejpajak.repository.GamePartRepository;
 import pl.maciejpajak.repository.GameRepository;
 import pl.maciejpajak.repository.GameScoreRepository;
@@ -40,6 +44,12 @@ public class GameEventHandler {
     
     @Autowired
     private PartScoreRepository partScoreRepository;
+    
+    @Autowired
+    private BetRepository betRepository;
+    
+    @Autowired
+    private BetResolver betResolver;
 
     @EventListener
     public void handleGameEvent(GameEvent gameEvent) {
@@ -49,9 +59,11 @@ public class GameEventHandler {
         
         switch (eventDto.getEventType()) {
         case GAME_START:
+            updateBets(game, BetLastCall.GAME_START);
             startGame(game, eventDto);
             break;
         case GAME_END:
+            updateBets(game, BetLastCall.GAME_END);
             endGame(game, eventDto);
             break;
         case GAME_PART_END:
@@ -65,6 +77,12 @@ public class GameEventHandler {
             partyOneOrTwoScored(game, eventDto);
             break;
         }
+    }
+    
+    private void updateBets(Game game, BetLastCall lastCall) {
+        Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(game.getId(), lastCall, true);
+        bets.stream().forEach(b -> b.setBetable(false));
+        betRepository.save(bets);
     }
     
     private void startGame(Game game, EventDto eventDto) {

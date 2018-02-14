@@ -17,7 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.maciejpajak.domain.coupon.UserCoupon;
+import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.game.util.BetOptionStatus;
 
 @Entity
@@ -50,7 +50,7 @@ public class PlacedBet {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
-    private UserCoupon coupon;
+    private Coupon coupon;
     
     @Enumerated(EnumType.STRING)
     private BetOptionStatus status;

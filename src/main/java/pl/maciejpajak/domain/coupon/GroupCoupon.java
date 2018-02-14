@@ -17,8 +17,7 @@ import pl.maciejpajak.domain.user.User;
 @Entity
 @Getter
 @Setter
-public class GroupCoupon extends UserCoupon {
-
+public class GroupCoupon extends Coupon {
     
     @OneToMany(mappedBy = "groupCoupon", cascade = CascadeType.PERSIST)
     private Set<CouponInvitation> intivations;

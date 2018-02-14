@@ -7,9 +7,9 @@ import pl.maciejpajak.api.dto.CouponInvitationShowDto;
 import pl.maciejpajak.api.dto.CouponShowDto;
 import pl.maciejpajak.api.dto.PlacedBetShowDto;
 import pl.maciejpajak.domain.bet.PlacedBet;
+import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
-import pl.maciejpajak.domain.coupon.UserCoupon;
 
 public final class DtoMappers {
 
@@ -31,7 +31,7 @@ public final class DtoMappers {
                 .userTransactoinAmount((inv.getBetTransaction() != null) ? inv.getBetTransaction().getAmount() : null)
                 .build();
             
-    public static final Function<UserCoupon, CouponShowDto> convertUserCouponToDto = 
+    public static final Function<Coupon, CouponShowDto> convertUserCouponToDto = 
             c -> CouponShowDto.builder()
                 .id(c.getId())
                 .created(c.getCreated())

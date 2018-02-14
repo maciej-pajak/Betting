@@ -60,8 +60,8 @@ public class User {
 //    @ManyToMany
 //    private Set<PrivateMessage> messages;
     
-    @OneToMany(mappedBy = "owner")
-    private Set<UserCoupon> coupons;
+//    @OneToMany(mappedBy = "owner")
+//    private Set<UserCoupon> coupons;
     
     @OneToMany(mappedBy = "invitedUser")
     private Set<CouponInvitation> couponInvitations;

@@ -5,6 +5,8 @@ import java.util.Set;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.Game;
+import pl.maciejpajak.domain.game.util.BetLastCall;
 
 @Entity
 @Getter
@@ -39,5 +42,10 @@ public class Bet {
     private Set<BetOption> betOptions;
     
     private String description;
+    
+    @Enumerated(EnumType.STRING)
+    private BetLastCall lastCall;
+    
+    private boolean betable;
     
 }

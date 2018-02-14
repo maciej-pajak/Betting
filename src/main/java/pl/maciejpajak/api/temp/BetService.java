@@ -25,8 +25,8 @@ public class BetService {
                     .orElseThrow(() -> new BaseEntityNotFoundException(betId)));
     }
     
-    public Collection<BetDto> findAllByGameIdAndVisible(Long gameId) {
-        Collection<Bet> bets = betRepository.findAllByGameIdAndVisible(gameId, true);
+    public Collection<BetDto> findAllBetableByGameIdAndVisible(Long gameId) {
+        Collection<Bet> bets = betRepository.findAllByGameIdAndBetableAndVisible(gameId, true, true);
         return bets.stream().map(convertToDto).collect(Collectors.toList());
     }
     

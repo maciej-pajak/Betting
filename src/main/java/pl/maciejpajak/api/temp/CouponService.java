@@ -1,5 +1,7 @@
 package pl.maciejpajak.api.temp;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -10,7 +12,9 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.hibernate.cfg.beanvalidation.GroupsPerOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import pl.maciejpajak.api.dto.BetOptionWithOddDto;
@@ -23,13 +27,17 @@ import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.coupon.UserCoupon;
+import pl.maciejpajak.domain.game.util.GameStatus;
 import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
+import pl.maciejpajak.exception.BetClosedException;
 import pl.maciejpajak.exception.BetsCombinationNotAllowedException;
+import pl.maciejpajak.exception.GameHasAlreadyStartedException;
 import pl.maciejpajak.exception.OddHasChangedException;
 import pl.maciejpajak.repository.BetOptionRepository;
-import pl.maciejpajak.repository.CouponRepository;
+import pl.maciejpajak.repository.CouponInvitationRepository;
+import pl.maciejpajak.repository.UserCouponRepository;
 import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.OddRepository;
 import pl.maciejpajak.repository.UserRepository;
@@ -38,48 +46,39 @@ import pl.maciejpajak.service.TransactionService;
 @Service
 public class CouponService {
 
-    private final CouponRepository couponRepository;
-    private final GroupCouponRepository groupCouponRepository;
-    private final OddRepository oddRepository;
-    private final BetOptionRepository betOptionRepository;
-    private final UserRepository userRepository;
-    private final TransactionService transactionService;
-    
     @Autowired
-    public CouponService(CouponRepository couponRepository,
-            OddRepository oddRepository,
-            BetOptionRepository betOptionRepository,
-            UserRepository userRepository,
-            TransactionService transactionService,
-            GroupCouponRepository groupCouponRepository) {
-        this.couponRepository = couponRepository;
-        this.oddRepository = oddRepository;
-        this.betOptionRepository = betOptionRepository;
-        this.userRepository = userRepository;
-        this.transactionService = transactionService;
-        this.groupCouponRepository = groupCouponRepository;
-    }
-    
-    // TODO remove
-    public Collection<CouponShowDto> findAllForCurrentUser(Long userId) {
-        return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream()
-                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
-    }
-    
+    private UserCouponRepository userCouponRepository;
+    @Autowired
+    private GroupCouponRepository groupCouponRepository;
+    @Autowired
+    private OddRepository oddRepository;
+    @Autowired
+    private BetOptionRepository betOptionRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private TransactionService transactionService;
+    @Autowired
+    private CouponInvitationRepository couponInvitationRepository;
+
     public Collection<CouponShowDto> findAllIndividualCoupons(Long userId) {
-        
+        return null; // TODO
     }
     
     public Collection<CouponShowDto> findAllGroupCoupons(Long userId) {
-        
+        return groupCouponRepository.findAllByOwnerIdOrIntivationsInvitedUserIdAndVisible(userId, userId, true)
+                .stream()
+                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
     public Collection<CouponShowDto> findOwnedGroupCoupons(Long userId) {
-        
+        return groupCouponRepository.findAllByOwnerIdAndVisible(userId, true).stream()
+                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
     public Collection<CouponShowDto> findInvitedGroupCoupons(Long userId) {
-        
+        return groupCouponRepository.findAllByIntivationsInvitedUserIdAndVisible(userId, true).stream()
+                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
 //    public CouponShowDto findOneById(Long id) {
 //        UserCoupon userCoupon = couponRepository.findOneByIdAndVisible(id, true)
@@ -103,7 +102,7 @@ public class CouponService {
             sendInvitations(coupon, (GroupCouponPlaceDto) couponDto);
             groupCouponRepository.saveAndFlush(coupon);
         } else {
-            couponRepository.saveAndFlush((UserCoupon) coupon);
+//            couponRepository.saveAndFlush((UserCoupon) coupon); // FIXME
         }
     }
 
@@ -138,11 +137,18 @@ public class CouponService {
         for (BetOptionWithOddDto b : couponDto.getBetOptionsWithOdds()) {
             BetOption betOption = betOptionRepository.findOneByIdAndVisible(b.getBetOptionId(), true)
                                     .orElseThrow(() -> new BaseEntityNotFoundException(b.getBetOptionId()));
+            if (!betOption.getBet().isBetable()) { // TODO check this
+                throw new BetClosedException(betOption.getBet().getId());
+            }
+            if (couponDto instanceof GroupCouponPlaceDto) { // TODO check this
+                if(!betOption.getBet().getGame().getStatus().equals(GameStatus.UPCOMING)) {
+                    throw new GameHasAlreadyStartedException();
+                }
+            }
 //            Odd odd = oddRepository.findOneById(b.getOddId())
 //                    .orElseThrow(() -> new BaseEntityNotFoundException(b.getBetOptionId()));
             Odd latestOdd = oddRepository.findFirstByBetOptionIdOrderByCreatedDesc(b.getBetOptionId())
                     .orElseThrow(() -> new BaseEntityNotFoundException(b.getBetOptionId()));
-            
             // if odd has changes since coupon was send and user doesn't accept odd change throw exception
             if (!b.getOddId().equals(latestOdd.getId()) && !couponDto.isOddsChangeAccepted()) {
                 throw new OddHasChangedException();
@@ -160,7 +166,6 @@ public class CouponService {
         // validate if bets can be combined (only one bet option from each bet)
         Set<Long> betsIds = new HashSet<>();
         placedBets.forEach(pb -> {
-            System.out.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX about ot get id");
             Long id = pb.getBetOption().getBet().getId();
             if (betsIds.contains(id)) {
                 throw new BetsCombinationNotAllowedException(); // TODO add message
@@ -172,8 +177,18 @@ public class CouponService {
         return placedBets;
     }
     
-    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amou) {
+    @Transactional
+    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
         User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-        
+        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
+                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
+        if (!invitation.getInvitedUser().getId().equals(userId)) {
+            throw new AccessDeniedException("access denied"); // TODO rethink
+        }
+        if (invitation.getBetTransaction() != null) {
+            throw new RuntimeException("invitation has already been accepted");
+        }
+        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
+        couponInvitationRepository.save(invitation);
     }
 }

@@ -50,12 +50,12 @@ public class CouponApi {
         return c;
     }
     
-    @GetMapping("/all")
-    public Collection<CouponShowDto> findAllCoupons(@AuthenticationPrincipal CurrentUser user) {
-        // TODO 
-        Long id = 1L;
-        return couponService.findAllForCurrentUser(id);
-    }
+//    @GetMapping("/all")
+//    public Collection<CouponShowDto> findAllCoupons(@AuthenticationPrincipal CurrentUser user) {
+//        // TODO 
+//        Long id = 1L;
+//        return couponService.findAllForCurrentUser(id);
+//    }
     
     @GetMapping("/all-individual")
     public Collection<CouponShowDto> findAllIndividualCoupons(@AuthenticationPrincipal CurrentUser user) {

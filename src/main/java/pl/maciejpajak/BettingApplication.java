@@ -1,5 +1,6 @@
 package pl.maciejpajak;
 
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +26,8 @@ public class BettingApplication {
 //
 //	@Bean 
 //	CommandLineRunner init() {
-//	    log.warn("puslihing event in command line runner");
-//	    applicationEventPublisher.publishEvent(new GameEndEvent(this, 1L));
-//	    log.warn("returnig from commandlinerunner");
+//	    BCryptPasswordEncoder en = new BCryptPasswordEncoder();
+//	    System.out.println("xxx>" + en.encode("123456"));
 //	    return null;
 //	}
 	
