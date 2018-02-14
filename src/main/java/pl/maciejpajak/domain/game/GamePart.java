@@ -1,5 +1,6 @@
 package pl.maciejpajak.domain.game;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
@@ -11,7 +12,10 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.score.PartScore;
 import pl.maciejpajak.domain.game.util.GameStatus;
@@ -19,6 +23,9 @@ import pl.maciejpajak.domain.game.util.GameStatus;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class GamePart {
 
     @Id
@@ -32,12 +39,10 @@ public class GamePart {
     
     private LocalDateTime startTime;
     
-    private boolean timeable;
-    
     @Enumerated(EnumType.STRING)
     private GameStatus status;
     
-    private int length;
+    private Duration duration;
     
     @OneToOne
     private PartScore finalPartScore;

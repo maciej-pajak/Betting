@@ -3,6 +3,8 @@ package pl.maciejpajak.domain.bet;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.Setter;
+import pl.maciejpajak.domain.game.util.BetOptionStatus;
 
 @Entity
 @Getter
@@ -39,4 +42,8 @@ public class BetOption {
 //    private Set<Odd> odds;
     
     private String description;
+    
+    @Enumerated(EnumType.STRING)
+    private BetOptionStatus status;
+    
 }

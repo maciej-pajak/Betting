@@ -28,4 +28,5 @@ public abstract class Score {
     protected int partyOneScore;
     protected int partyTwoScore;
     protected LocalDateTime time;
+    
 }
