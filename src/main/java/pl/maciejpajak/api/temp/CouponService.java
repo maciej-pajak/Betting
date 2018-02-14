@@ -64,6 +64,13 @@ public class CouponService {
         return couponRepository.findAllByOwnerIdAndVisible(userId, true).stream().map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
+//    public CouponShowDto findOneById(Long id) {
+//        UserCoupon userCoupon = couponRepository.findOneByIdAndVisible(id, true)
+//                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
+//        if (userCoupon.getOwner().getId().equals(obj))
+//        return 
+//    }
+    
     @Transactional
     public void createCoupon(CouponPlaceDto couponDto, Long userId) {
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));

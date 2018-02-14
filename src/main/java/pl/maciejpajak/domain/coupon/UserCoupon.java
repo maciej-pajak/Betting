@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.bet.PlacedBet;
+import pl.maciejpajak.domain.game.util.CouponStatus;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
 

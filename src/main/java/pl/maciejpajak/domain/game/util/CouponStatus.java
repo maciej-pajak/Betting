@@ -1,4 +1,4 @@
-package pl.maciejpajak.domain.coupon;
+package pl.maciejpajak.domain.game.util;
 
 public enum CouponStatus {
 

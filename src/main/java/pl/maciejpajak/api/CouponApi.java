@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,7 +51,9 @@ public class CouponApi {
     
     @GetMapping("/all")
     public Collection<CouponShowDto> findAllCoupons(@AuthenticationPrincipal CurrentUser user) {
-        return couponService.findAllForCurrentUser(user.getId());
+        // TODO 
+        Long id = 1L;
+        return couponService.findAllForCurrentUser(id);
     }
     
     @PostMapping("/create")
@@ -62,5 +65,10 @@ public class CouponApi {
     public void createGroupCoupon(@RequestBody @Valid GroupCouponPlaceDto couponDto, @AuthenticationPrincipal CurrentUser principal) {
         couponService.createCoupon(couponDto, principal.getId());
     }
+    
+//    @GetMapping("/show/{id}") // TODO
+//    public CouponShowDto showCouponById(@PathVariable Long id, @AuthenticationPrincipal CurrentUser user) {
+//        
+//    }
 
 }

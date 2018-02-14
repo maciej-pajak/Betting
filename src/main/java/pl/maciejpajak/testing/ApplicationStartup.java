@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 import org.slf4j.Logger;
@@ -26,7 +24,6 @@ import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.GameRepository;
 import pl.maciejpajak.repository.RoleRepository;
 import pl.maciejpajak.repository.UserRepository;
-import pl.maciejpajak.testing.event.event.GameEndEvent;
 
 @Component
 public class ApplicationStartup implements ApplicationListener<ApplicationReadyEvent> {

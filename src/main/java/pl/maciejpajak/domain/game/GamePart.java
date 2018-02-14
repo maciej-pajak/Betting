@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.score.PartScore;
+import pl.maciejpajak.domain.game.util.GameResult;
 import pl.maciejpajak.domain.game.util.GameStatus;
 
 @Entity
@@ -41,6 +42,9 @@ public class GamePart {
     
     @Enumerated(EnumType.STRING)
     private GameStatus status;
+    
+    @Enumerated(EnumType.STRING)
+    private GameResult result;
     
     private Duration duration;
     

@@ -7,7 +7,7 @@ import java.util.Set;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import pl.maciejpajak.domain.coupon.CouponStatus;
+import pl.maciejpajak.domain.game.util.CouponStatus;
 
 @Getter
 @Setter

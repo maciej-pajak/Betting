@@ -13,6 +13,7 @@ import pl.maciejpajak.domain.game.GamePart;
 import pl.maciejpajak.domain.game.score.GameScore;
 import pl.maciejpajak.domain.game.score.PartScore;
 import pl.maciejpajak.domain.game.util.EventType;
+import pl.maciejpajak.domain.game.util.GameResult;
 import pl.maciejpajak.domain.game.util.GameStatus;
 import pl.maciejpajak.domain.game.util.ScoreType;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
@@ -22,12 +23,11 @@ import pl.maciejpajak.repository.GameScoreRepository;
 import pl.maciejpajak.repository.PartScoreRepository;
 import pl.maciejpajak.testing.event.EventDto;
 import pl.maciejpajak.testing.event.event.GameEvent;
-import pl.maciejpajak.testing.event.event.GameStartEvent;
 
 @Component
-public class GameStartHandler {
+public class GameEventHandler {
     
-    private static final Logger log = LoggerFactory.getLogger(GameStartHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(GameEventHandler.class);
     
     @Autowired
     private GameRepository gameRepository;
@@ -40,17 +40,34 @@ public class GameStartHandler {
     
     @Autowired
     private PartScoreRepository partScoreRepository;
-    
-    private void test(GameStartEvent gameStartEvent) {
-        EventDto eventDto = gameStartEvent.getEventDto();
-    }
-    
+
     @EventListener
-    public void handleGameStartEvent(GameStartEvent gameStartEvent) {
-        EventDto eventDto = gameStartEvent.getEventDto();
-        // find game
+    public void handleGameEvent(GameEvent gameEvent) {
+        EventDto eventDto = gameEvent.getEventDto();
         Game game = gameRepository.findOneByIdAndVisible(eventDto.getGameId(), true)
                 .orElseThrow(() -> new BaseEntityNotFoundException(eventDto.getGameId()));
+        
+        switch (eventDto.getEventType()) {
+        case GAME_START:
+            startGame(game, eventDto);
+            break;
+        case GAME_END:
+            endGame(game, eventDto);
+            break;
+        case GAME_PART_END:
+            endGamePart(game, eventDto);
+            break;
+        case GAME_PART_START:
+            createGamePart(game, eventDto);
+            break;
+        case PARTY_ONE_SCORED:
+        case PARTY_TWO_SCORED:
+            partyOneOrTwoScored(game, eventDto);
+            break;
+        }
+    }
+    
+    private void startGame(Game game, EventDto eventDto) {
         // update status
         game.setStatus(GameStatus.LIVE);
         gameRepository.save(game);
@@ -61,12 +78,7 @@ public class GameStartHandler {
         
     }
     
-    public void handlePartyOneOrTwoScoredEvent(GameEvent gameEvent) {
-        EventDto eventDto = gameEvent.getEventDto();
-        
-        Game game = gameRepository.findOneByIdAndVisible(eventDto.getGameId(), true)
-                .orElseThrow(() -> new BaseEntityNotFoundException(eventDto.getGameId()));
-        
+    public void partyOneOrTwoScored(Game game, EventDto eventDto) {
         GamePart gamePart = gamePartRepository.findTopByGameIdAndVisibleOrderByStartTimeDesc(game.getId(), true)
                                 .orElseThrow(() -> new BaseEntityNotFoundException("could not find game part for game id = " + game.getId()));
         
@@ -95,23 +107,41 @@ public class GameStartHandler {
         }
     }
     
-    private void handlePartStartEvent(GameEvent gameEvent) {
-        EventDto eventDto = gameEvent.getEventDto();
-        
-        Game game = gameRepository.findOneByIdAndVisible(eventDto.getGameId(), true)
-                .orElseThrow(() -> new BaseEntityNotFoundException(eventDto.getGameId()));
-        
-        createGamePart(game, eventDto);
-        
-    }
-    
-    private void endGamePart(Game game) {
+    private void endGamePart(Game game, EventDto eventDto) {
         GamePart gamePart = gamePartRepository.findTopByGameIdAndVisibleOrderByStartTimeDesc(game.getId(), true)
                 .orElseThrow(() -> new BaseEntityNotFoundException("could not find game part for game id = " + game.getId()));
-        gamePart.setFinalPartScore(
-                partScoreRepository.findTopByGamePartIdOrderByTimeDesc(gamePart.getId())
-                    .orElseThrow(() -> new BaseEntityNotFoundException("could not find part score for game part id = " + gamePart.getId())));
+        
+        PartScore finalScore = partScoreRepository.findTopByGamePartIdOrderByTimeDesc(gamePart.getId())
+                .orElseThrow(() -> new BaseEntityNotFoundException("could not find part score for game part id = " + gamePart.getId()));
+        // set final score
+        gamePart.setFinalPartScore(finalScore);
+        // set part status to ENDED
+        gamePart.setStatus(GameStatus.ENDED);
+        // assess winner and set result
+        GameResult partResult;
+        int resDiff = finalScore.getPartyOneScore() - finalScore.getPartyTwoScore();
+        int partyOneScored = 0;
+        int partyTwoScored = 0;
+        if (resDiff > 0) {
+            partResult = GameResult.PARTY_ONE_WON;
+            partyOneScored = 1;
+        } else if (resDiff == 0) {
+            partResult = GameResult.DRAW;
+        } else {
+            partResult = GameResult.PARTY_TWO_WON;
+            partyTwoScored = 1;
+        }
+        gamePart.setResult(partResult);
         gamePartRepository.save(gamePart);
+        
+        // update game score if necessary
+        if (game.getScoreType().equals(ScoreType.WON_PART_POINTS)) {
+            GameScore gs = gameScoreRepository.findTopByGameIdOrderByTimeDesc(game.getId())
+                    .orElseThrow(() -> new RuntimeException()); // TODO cusotm exception - this should not happen
+            gameScoreRepository.save(
+                    new GameScore(null, gs.getPartyOneScore() + partyOneScored, gs.getPartyTwoScore() + partyTwoScored, eventDto.getTime(), game));
+        }
+        
     }
     
     private void createGamePart(Game game, EventDto eventDto) {
@@ -126,6 +156,26 @@ public class GameStartHandler {
         // create initial part score 0 : 0
         PartScore ps = new PartScore(null, 0, 0, eventDto.getTime(), gamePart);
         partScoreRepository.save(ps);
+    }
+    
+    private void endGame(Game game, EventDto eventDto) {
+        GameScore gs = gameScoreRepository.findTopByGameIdOrderByTimeDesc(game.getId()).orElseThrow(() -> new RuntimeException()); // TODO custom exception
+        game.setEndTime(eventDto.getTime());
+        game.setStatus(GameStatus.ENDED);
+        game.setGameFinalScore(gs);
+        
+        GameResult result;
+        int resDiff = gs.getPartyOneScore() - gs.getPartyTwoScore();
+        if (resDiff > 0) {
+            result = GameResult.PARTY_ONE_WON;
+        } else if(resDiff == 0) {
+            result = GameResult.DRAW;
+        } else {
+            result = GameResult.PARTY_TWO_WON;
+        }
+        game.setResult(result);
+        gameRepository.save(game);
+        // TODO resolve bets
     }
 
 }

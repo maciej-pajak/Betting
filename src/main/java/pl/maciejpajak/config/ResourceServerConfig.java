@@ -20,10 +20,13 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.headers().frameOptions().disable().and()
-                .authorizeRequests()
-                .antMatchers("/","/home","/register","/login", "/demo/**").permitAll()
-                .antMatchers("/**").authenticated();
+//        http.headers().frameOptions().disable().and()
+//                .authorizeRequests()
+//                .antMatchers("/","/home","/register","/login", "/demo/**").permitAll()
+//                .antMatchers("/**").authenticated();
+        http.authorizeRequests()
+            .antMatchers("/register").permitAll()
+            .antMatchers("/**").permitAll();
     }
 
     @Override

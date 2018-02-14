@@ -6,24 +6,24 @@ import java.util.Set;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
+import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.offers.SpecialOffer;
 import pl.maciejpajak.security.Role;
 
@@ -31,6 +31,9 @@ import pl.maciejpajak.security.Role;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id

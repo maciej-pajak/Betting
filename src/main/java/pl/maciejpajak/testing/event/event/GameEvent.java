@@ -6,7 +6,7 @@ import lombok.Getter;
 import pl.maciejpajak.testing.event.EventDto;
 
 @Getter
-public abstract class GameEvent extends ApplicationEvent {
+public class GameEvent extends ApplicationEvent {
 
     private EventDto eventDto;
     

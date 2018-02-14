@@ -58,7 +58,7 @@ public class GameService {
     
     public PartScore findLatestPartScore(Long gameId, Long partId) {
         if (partId == null) {
-            partId  = gamePartRepository.findTopByGameIdOrderByStartTimeDesc(gameId)
+            partId  = gamePartRepository.findTopByGameIdAndVisibleOrderByStartTimeDesc(gameId, true)
                     .orElseThrow(() -> new BaseEntityNotFoundException(gameId))
                     .getId();
         }

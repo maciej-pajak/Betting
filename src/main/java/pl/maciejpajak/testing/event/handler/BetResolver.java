@@ -24,12 +24,12 @@ import pl.maciejpajak.domain.game.GamePart;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.GameRepository;
-import pl.maciejpajak.testing.event.event.GameEndEvent;
+import pl.maciejpajak.testing.event.event.GameEvent;
 
 @Component
-public class GameEndHandler {
+public class BetResolver {
 
-    private static final Logger log = LoggerFactory.getLogger(GameEndHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(BetResolver.class);
     
     @Autowired
     private GameRepository gameRepository;
@@ -38,7 +38,7 @@ public class GameEndHandler {
     private BetOptionRepository betOptionRepository;
 
     @EventListener
-    public void handleGameEndEvent(GameEndEvent gameEndEvent) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
+    public void handleGameEndEvent(GameEvent gameEndEvent) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
         
         resolveBetOptions(gameEndEvent.getEventDto().getGameId());
     }

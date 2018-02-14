@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.score.GameScore;
+import pl.maciejpajak.domain.game.util.GameResult;
 import pl.maciejpajak.domain.game.util.GameStatus;
 import pl.maciejpajak.domain.game.util.ScoreType;
 
@@ -35,9 +36,13 @@ public class Game {
     private boolean visible = true;
     
     private LocalDateTime startTime;
+    private LocalDateTime endTime;
     
     @Enumerated(EnumType.STRING)
     private GameStatus status;
+    
+    @Enumerated(EnumType.STRING)
+    private GameResult result;
     
     private String description;
     

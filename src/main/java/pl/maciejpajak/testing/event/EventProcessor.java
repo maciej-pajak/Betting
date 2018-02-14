@@ -10,12 +10,7 @@ import pl.maciejpajak.domain.game.Event;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.EventRepository;
 import pl.maciejpajak.repository.GameRepository;
-import pl.maciejpajak.testing.event.event.GameEndEvent;
-import pl.maciejpajak.testing.event.event.GamePartEndEvent;
-import pl.maciejpajak.testing.event.event.GamePartStartEvent;
-import pl.maciejpajak.testing.event.event.GameStartEvent;
-import pl.maciejpajak.testing.event.event.PartyOneScoreEvent;
-import pl.maciejpajak.testing.event.event.PartyTwoScoreEvent;
+import pl.maciejpajak.testing.event.event.GameEvent;
 
 @Service
 public class EventProcessor {
@@ -34,27 +29,7 @@ public class EventProcessor {
     public void process(EventDto event) {
         log.debug("System received new event {}", event);
         saveEvent(event);
-        
-        switch (event.getEventType()) {
-        case GAME_START:
-            applicationEventPublisher.publishEvent(new GameStartEvent(this, event));
-            break;
-        case GAME_END:
-            applicationEventPublisher.publishEvent(new GameEndEvent(this, event));
-            break;
-        case GAME_PART_END:
-            applicationEventPublisher.publishEvent(new GamePartEndEvent(this, event));
-            break;
-        case GAME_PART_START:
-            applicationEventPublisher.publishEvent(new GamePartStartEvent(this, event));
-            break;
-        case PARTY_ONE_SCORED:
-            applicationEventPublisher.publishEvent(new PartyOneScoreEvent(this, event));
-            break;
-        case PARTY_TWO_SCORED:
-            applicationEventPublisher.publishEvent(new PartyTwoScoreEvent(this, event));
-            break;
-        }
+        applicationEventPublisher.publishEvent(new GameEvent(this, event));
     }
     
     private void saveEvent(EventDto eventDto) {

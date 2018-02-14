@@ -8,6 +8,7 @@ import pl.maciejpajak.domain.user.User;
 
 public interface UserRepository extends JpaRepository<User, Long>{
 
+    boolean existsByLoginOrEmail(String login, String email);
     Optional<User> findOneByLoginOrEmailEquals(String login, String email); // TODO and visible = true
     Optional<User> findOneById(Long id); // TODO move to version with visble
     Optional<User> findOneByIdAndVisible(Long id, boolean isvisible);
