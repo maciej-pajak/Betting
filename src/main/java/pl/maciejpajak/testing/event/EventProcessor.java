@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
 
 import pl.maciejpajak.domain.game.Event;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
@@ -16,11 +17,10 @@ import pl.maciejpajak.testing.event.event.GameStartEvent;
 import pl.maciejpajak.testing.event.event.PartyOneScoreEvent;
 import pl.maciejpajak.testing.event.event.PartyTwoScoreEvent;
 
+@Service
 public class EventProcessor {
     
-    
     private static final Logger log = LoggerFactory.getLogger(EventProcessor.class);
-
     
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
@@ -32,7 +32,7 @@ public class EventProcessor {
     private GameRepository gameRepository;
     
     public void process(EventDto event) {
-        log.debug("System received new event {0}", event);
+        log.debug("System received new event {}", event);
         saveEvent(event);
         
         switch (event.getEventType()) {

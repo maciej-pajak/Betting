@@ -8,6 +8,6 @@ import pl.maciejpajak.domain.game.GamePart;
 
 public interface GamePartRepository extends JpaRepository<GamePart, Long>{
 
-    public Optional<GamePart> findTopByGameIdOrderByStartTimeDesc(Long gameId);
+    public Optional<GamePart> findTopByGameIdAndVisibleOrderByStartTimeDesc(Long gameId, boolean isVisible);
     
 }

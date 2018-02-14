@@ -29,4 +29,16 @@ public abstract class Score {
     protected int partyTwoScore;
     protected LocalDateTime time;
     
+    public Score() {}
+    
+    public Score(Long id, int partyOneScore, int partyTwoScore, LocalDateTime time) {
+        super();
+        this.id = id;
+        this.partyOneScore = partyOneScore;
+        this.partyTwoScore = partyTwoScore;
+        this.time = time;
+    }
+    
+    
+    
 }

@@ -1,5 +1,7 @@
 package pl.maciejpajak.domain.game.score;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -20,5 +22,12 @@ public class PartScore extends Score {
     @JoinColumn(name = "game_part_id")
     @JsonIgnore
     private GamePart gamePart;
+
+    public PartScore(Long id, int partyOneScore, int partyTwoScore, LocalDateTime time, GamePart gamePart) {
+        super(id, partyOneScore, partyTwoScore, time);
+        this.gamePart = gamePart;
+    }
+    
+    
     
 }
