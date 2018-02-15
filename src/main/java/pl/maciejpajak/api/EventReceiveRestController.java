@@ -1,7 +1,9 @@
 package pl.maciejpajak.api;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
-import java.util.Collection;
+
+import javax.script.ScriptException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,14 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.maciejpajak.domain.bet.Bet;
-import pl.maciejpajak.domain.bet.BetOption;
+import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.util.BetLastCall;
 import pl.maciejpajak.domain.game.util.EventType;
-import pl.maciejpajak.repository.BetOptionRepository;
-import pl.maciejpajak.repository.BetRepository;
+import pl.maciejpajak.repository.GameRepository;
 import pl.maciejpajak.testing.event.EventDto;
 import pl.maciejpajak.testing.event.EventProcessor;
+import pl.maciejpajak.testing.event.handler.BetResolver;
 
 /**
  * This controller is responsible for receiving live events.
@@ -56,6 +57,19 @@ public class EventReceiveRestController {
 //    
 //    @Autowired
 //    private BetOptionRepository betOptionRepository;
+    
+    @Autowired
+    private GameRepository gamerepository;
+    
+    @Autowired
+    private BetResolver resolver;
+    
+    @GetMapping("/resolve")
+    public void res() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
+        Game game = gamerepository.findOne(1L);
+        resolver.resolve(game, BetLastCall.GAME_END);
+    }
+    
 //    
 //    @GetMapping("/test")
 //    public Collection<BetOption> test() {

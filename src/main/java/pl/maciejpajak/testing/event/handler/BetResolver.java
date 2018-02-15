@@ -24,6 +24,7 @@ import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.GamePart;
 import pl.maciejpajak.domain.game.util.BetLastCall;
+import pl.maciejpajak.domain.game.util.BetOptionStatus;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.BetRepository;
@@ -50,44 +51,24 @@ public class BetResolver {
 //    }
     
     @Async
-    public void resolve(Game game, BetLastCall lastCall) {
-        // make best with lastCall unbetable
+    public void resolve(Game game, BetLastCall lastCall) throws ScriptException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        // make bets with lastCall unbetable
         Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(game.getId(), lastCall, true);
-        bets.stream().forEach(b -> b.setBetable(false));
+        bets.forEach(b -> b.setBetable(false));
         betRepository.save(bets);
         
-        // resolve and
-        // update each bet option with bet option status
-            // update all coupons with specific bet option
-    }
-    
-    @Transactional
-    private void endGame(Long gameId) {
-        Game game = gameRepository.findOneByIdAndVisible(gameId, true).orElseThrow(() -> new BaseEntityNotFoundException(gameId));
-        for (GamePart part : game.getGameParts()) {
-            
-        }
-    }
-    
-    private boolean resolveBetOptions(Long gameId) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
         Long start = System.nanoTime();
-        Long start2 = System.nanoTime();
+        
         ScriptEngineManager mgr = new ScriptEngineManager();
         ScriptEngine engine = mgr.getEngineByName("JavaScript");
-        log.info("create engine time: " + (System.nanoTime() - start2)/1000000 + " ms");
-        Game game = gameRepository.findOneByIdAndVisible(gameId, true).orElseThrow(() -> new BaseEntityNotFoundException(gameId));
-        if (game.getGameFinalScore() == null) {
-            // TODO throw exception
-        }
-        List<BetOption> betOptions = betOptionRepository.findAllByBetGameIdAndVisible(gameId, true);
+        
+        List<BetOption> betOptions = betOptionRepository.findAllByBetInAndVisible(bets, true);
+
         for (BetOption bo : betOptions) {
-            Pattern r = Pattern.compile("\\{([^\\}]+)\\}");
             String winCondition = bo.getWinCondition();
-            // Now create matcher object.
+            Pattern r = Pattern.compile("\\{([^\\}]+)\\}");
             Matcher m = r.matcher(winCondition);
-            int i = 0;
             while (m.find( )) {
-                i++;
                Object o = game;
                String[] names = m.group(1).split("\\.");
                for (int j = 0 ; j < names.length - 1 ; j++) {
@@ -98,14 +79,17 @@ public class BetResolver {
                }
                winCondition = winCondition.replace(m.group(0), o.toString());               
             }
+            boolean isWinConditionSatisfied = (boolean) engine.eval(winCondition);
+            log.debug("initial win condition: {}", bo.getWinCondition());
+            log.debug("parseg win condition: {}", winCondition);
+            log.debug("win result: {}", isWinConditionSatisfied);
             
-            Long stop = (System.nanoTime() - start) / 1000000;
-            log.info("win condition: " + winCondition);
-//            log.info("win result", engine.eval(winCondition));
-            log.info("execution time " + stop + " ms");
+            bo.setStatus(isWinConditionSatisfied ? BetOptionStatus.WON : BetOptionStatus.LOST);
         }
+        betOptionRepository.save(betOptions);
 
-        return false;
+        Long stop = (System.nanoTime() - start) / 1000000;
+        log.debug("bet resolving time {} ms", stop);
     }
     
 }
