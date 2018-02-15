@@ -18,7 +18,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.game.util.CouponStatus;
@@ -29,6 +31,8 @@ import pl.maciejpajak.domain.user.User;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class Coupon {
     
     @Id
@@ -41,6 +45,8 @@ public abstract class Coupon {
 
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.PERSIST)
     protected Set<PlacedBet> placedBets;
+    
+    protected int unsersolvedBetsCount;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

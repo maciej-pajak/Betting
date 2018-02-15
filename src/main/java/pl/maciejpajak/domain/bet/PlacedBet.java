@@ -51,8 +51,8 @@ public class PlacedBet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;
-    
-    @Enumerated(EnumType.STRING)
-    private BetOptionStatus status;
-    
+//    
+//    @Enumerated(EnumType.STRING)
+//    private BetOptionStatus status;
+//    
 }

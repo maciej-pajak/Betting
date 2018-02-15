@@ -66,8 +66,8 @@ public class EventReceiveRestController {
     
     @GetMapping("/resolve")
     public void res() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
-        Game game = gamerepository.findOne(1L);
-        resolver.resolve(game, BetLastCall.GAME_END);
+//        Game game = gamerepository.findOne(1L);
+//        resolver.resolve(game, BetLastCall.GAME_END);
     }
     
 //    

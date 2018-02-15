@@ -1,7 +1,5 @@
 package pl.maciejpajak.api.temp;
 
-import static org.hamcrest.CoreMatchers.nullValue;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -12,7 +10,8 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.hibernate.cfg.beanvalidation.GroupsPerOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -21,13 +20,17 @@ import pl.maciejpajak.api.dto.BetOptionWithOddDto;
 import pl.maciejpajak.api.dto.CouponPlaceDto;
 import pl.maciejpajak.api.dto.CouponShowDto;
 import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
+import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.bet.Odd;
 import pl.maciejpajak.domain.bet.PlacedBet;
+import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.coupon.UserCoupon;
+import pl.maciejpajak.domain.game.util.CouponStatus;
 import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
@@ -37,14 +40,18 @@ import pl.maciejpajak.exception.GameHasAlreadyStartedException;
 import pl.maciejpajak.exception.OddHasChangedException;
 import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.CouponInvitationRepository;
-import pl.maciejpajak.repository.UserCouponRepository;
+import pl.maciejpajak.repository.CouponRepository;
 import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.OddRepository;
+import pl.maciejpajak.repository.UserCouponRepository;
 import pl.maciejpajak.repository.UserRepository;
 import pl.maciejpajak.service.TransactionService;
 
+
 @Service
 public class CouponService {
+
+    private static final Logger log = LoggerFactory.getLogger(CouponService.class);
 
     @Autowired
     private UserCouponRepository userCouponRepository;
@@ -90,19 +97,37 @@ public class CouponService {
     @Transactional
     public void createCoupon(CouponPlaceDto couponDto, Long userId) {
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-
-        GroupCoupon coupon = new GroupCoupon(LocalDateTime.now(),
-                prepareAndValidateBets(couponDto),
-                user,
-                transactionService.createTransaction(couponDto.getAmount(), user, TransactionType.PLACE_BET));
-        
-        coupon.getPlacedBets().forEach(pb -> pb.setCoupon(coupon));
-        // TODO add total value
         if (couponDto instanceof GroupCouponPlaceDto) {
-            sendInvitations(coupon, (GroupCouponPlaceDto) couponDto);
-            groupCouponRepository.saveAndFlush(coupon);
+            GroupCoupon groupCoupon = GroupCoupon.builder()
+                    .created(LocalDateTime.now())
+                    .placedBets(prepareAndValidateBets(couponDto))
+                    .owner(user)
+                    .ownerTransaction(transactionService.createTransaction(couponDto.getAmount(), user, TransactionType.PLACE_BET))
+                    .status(CouponStatus.PENDING)
+                    .visible(true)
+                    .build();
+            groupCoupon.setUnsersolvedBetsCount(groupCoupon.getPlacedBets().size());
+            groupCoupon.setValue(groupCoupon.getOwnerTransaction().getAmount()); // initial value, this will be increased when coupon inviatation is accepted
+            
+            groupCoupon.getPlacedBets().forEach(pb -> pb.setCoupon(groupCoupon));
+            // TODO add total value
+        
+            sendInvitations(groupCoupon, (GroupCouponPlaceDto) couponDto);
+            groupCouponRepository.saveAndFlush(groupCoupon);
         } else {
-//            couponRepository.saveAndFlush((UserCoupon) coupon); // FIXME
+            UserCoupon userCoupon = UserCoupon.builder()
+                    .created(LocalDateTime.now())
+                    .placedBets(prepareAndValidateBets(couponDto))
+                    .owner(user)
+                    .ownerTransaction(transactionService.createTransaction(couponDto.getAmount(), user, TransactionType.PLACE_BET))
+                    .status(CouponStatus.PLACED)
+                    .visible(true)
+                    .build();
+            userCoupon.setValue(userCoupon.getOwnerTransaction().getAmount());
+            userCoupon.setUnsersolvedBetsCount(userCoupon.getPlacedBets().size());
+            userCoupon.getPlacedBets().forEach(pb -> pb.setCoupon(userCoupon));
+            
+            userCouponRepository.saveAndFlush(userCoupon);
         }
     }
 
@@ -115,7 +140,7 @@ public class CouponService {
         
         for (Long id : invitedIds) {
             if (id.equals(coupon.getOwner().getId())) {
-                throw new RuntimeException(); // TODO define exception - user cannot invite himself
+                throw new RuntimeException("user cannot invite himself"); // TODO define exception - user cannot invite himself
             }
             invitations.add(
                    CouponInvitation.builder()
@@ -125,6 +150,10 @@ public class CouponService {
                        .build()
                     );
         }
+        if (invitations.isEmpty()) {
+            throw new RuntimeException("no user is invited for this bet");
+        }
+        coupon.setUnacceptedInvitationsCount(invitations.size());
         coupon.setIntivations(invitations);
     }
        
@@ -163,6 +192,10 @@ public class CouponService {
                     );
         }
         
+        if (placedBets.isEmpty()) {
+            throw new RuntimeException("there are no bets on coupon");
+        }
+        
         // validate if bets can be combined (only one bet option from each bet)
         Set<Long> betsIds = new HashSet<>();
         placedBets.forEach(pb -> {
@@ -177,18 +210,53 @@ public class CouponService {
         return placedBets;
     }
     
-    @Transactional
-    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
-        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
-                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
-        if (!invitation.getInvitedUser().getId().equals(userId)) {
-            throw new AccessDeniedException("access denied"); // TODO rethink
-        }
-        if (invitation.getBetTransaction() != null) {
-            throw new RuntimeException("invitation has already been accepted");
-        }
-        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
-        couponInvitationRepository.save(invitation);
+//    @Transactional
+//    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
+//        
+//        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
+//        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
+//                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
+//        if (!invitation.getInvitedUser().getId().equals(userId)) {
+//            throw new AccessDeniedException("access denied"); // TODO rethink
+//        }
+//        if (invitation.getBetTransaction() != null) {
+//            throw new RuntimeException("invitation has already been accepted");
+//        }
+//        int unacceptedInvitations = invitation.getGroupCoupon().getUnacceptedInvitationsCount() - 1;
+//        invitation.getGroupCoupon().setUnacceptedInvitationsCount(unacceptedInvitations);
+//        log.debug("unaccepted invitations count: {} (after decrementation)", unacceptedInvitations);
+//        Coupon coupon = invitation.getGroupCoupon();
+//        if (unacceptedInvitations == 0) {   // TODO check if this persists to db
+//            coupon.setStatus(CouponStatus.PLACED);
+//        }
+//        coupon.setValue(coupon.getValue().add(amount));
+//        couponRepository.save(coupon);
+//        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
+//        couponInvitationRepository.save(invitation);
+//    }
+    
+    @Autowired // FIXME
+    private CouponRepository couponRepository;
+    
+    //TODO maybe async?
+    public void cancelUnacceptedGroupCoupons(Collection<Bet> bets) {
+//        groupCouponRepository.findAllByStatusAndPlacedBetsBetsInAndVisible(CouponStatus.PENDING, bets, true)
+        couponRepository.findAllByStatusIsAndPlacedBetsBetOptionBetInAndVisible(CouponStatus.PENDING, bets, true)
+            .stream()
+            .filter(c -> (c instanceof GroupCoupon))
+            .map(c -> (GroupCoupon) c)
+            .forEach(this::cancelGroupCoupon); // TODO Add bets
+    }
+    
+    private void cancelGroupCoupon(GroupCoupon groupCoupon) {
+        log.debug("cancelling coupon with id = {}", groupCoupon.getId());
+        groupCoupon.getIntivations().forEach(inv -> {
+            Transaction t = inv.getBetTransaction();
+            if (t != null) {
+                transactionService.createTransaction(t.getAmount(), t.getOwner(), TransactionType.CANCEL_BET);
+            }
+        });
+        groupCoupon.setStatus(CouponStatus.CANCELLED);
+        groupCouponRepository.save(groupCoupon);
     }
 }

@@ -25,8 +25,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 //                .antMatchers("/","/home","/register","/login", "/demo/**").permitAll()
 //                .antMatchers("/**").authenticated();
         http.authorizeRequests()
+            .antMatchers("/coupons/**").authenticated()
+            .antMatchers("/coupon-invitations").authenticated()
             .antMatchers("/register").permitAll()
             .antMatchers("/**").permitAll();
+            
     }
 
     @Override
