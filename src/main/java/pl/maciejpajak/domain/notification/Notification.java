@@ -1,4 +1,6 @@
-package pl.maciejpajak.domain.game;
+package pl.maciejpajak.domain.notification;
+
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -7,39 +9,36 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.hibernate.validator.constraints.NotBlank;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.maciejpajak.domain.user.User;
 
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class PlayingParty {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;
-    
-    @JsonIgnore
-    private boolean visible = true;
-    
-    @NotBlank
-    private String name;
-    
-    @NotBlank
-    private String description;
+    private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "sport_id")
-    private Sport sport;
+    @JoinColumn(name = "user_id")
+    private User user;
+    
+    private String message;
+    
+    private LocalDateTime created;
+    
+    private boolean read;
+    
+    private Long objectId;
     
 }
+

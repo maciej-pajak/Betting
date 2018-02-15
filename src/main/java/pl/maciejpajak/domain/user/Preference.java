@@ -9,16 +9,23 @@ import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class Preference {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    private boolean visible = true;
-    
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

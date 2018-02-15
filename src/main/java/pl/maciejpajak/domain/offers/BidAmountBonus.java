@@ -6,8 +6,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
-public class BidAmountDiscount {
+@Getter
+@Setter
+public class BidAmountBonus {
 
     @Id
     @GeneratedValue
@@ -15,8 +20,8 @@ public class BidAmountDiscount {
     
     private boolean visible = true;
     
-    private BigDecimal minimalAmount;
+    private BigDecimal minimalBid;
     
-    private BigDecimal percentageRevenuBonus;
+    private BigDecimal relativeRevenuBonus = BigDecimal.ZERO;
     
 }

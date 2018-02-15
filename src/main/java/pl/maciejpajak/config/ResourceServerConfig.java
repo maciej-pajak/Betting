@@ -7,10 +7,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
-/**
- *The @EnableResourceServer annotation adds a filter of type OAuth2AuthenticationProcessingFilter automatically
- *to the Spring Security filter chain.
- */
 @Configuration
 @EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
@@ -25,8 +21,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 //                .antMatchers("/","/home","/register","/login", "/demo/**").permitAll()
 //                .antMatchers("/**").authenticated();
         http.authorizeRequests()
+            .antMatchers("/coupons/bonuses").permitAll()
             .antMatchers("/coupons/**").authenticated()
             .antMatchers("/coupon-invitations").authenticated()
+            .antMatchers("/subscriptions/**").authenticated()
             .antMatchers("/register").permitAll()
             .antMatchers("/**").permitAll();
             

@@ -9,14 +9,13 @@ import javax.validation.Valid;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.api.dto.BetOptionWithOddDto;
+import pl.maciejpajak.api.dto.BidAmountBonusDto;
 import pl.maciejpajak.api.dto.CouponPlaceDto;
 import pl.maciejpajak.api.dto.CouponShowDto;
 import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
@@ -87,6 +86,12 @@ public class CouponApi {
     public void createGroupCoupon(@RequestBody @Valid GroupCouponPlaceDto couponDto, @AuthenticationPrincipal CurrentUser principal) {
         couponService.createCoupon(couponDto, principal.getId());
     }
+    
+    @GetMapping("/bonuses")
+    public Collection<BidAmountBonusDto> showAvailableBidAmountBonuses() {
+        return couponService.findAllBidAmountBonuses();
+    }
+
     
 //    @GetMapping("/show/{id}") // TODO
 //    public CouponShowDto showCouponById(@PathVariable Long id, @AuthenticationPrincipal CurrentUser user) {

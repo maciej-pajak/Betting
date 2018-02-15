@@ -3,6 +3,7 @@ package pl.maciejpajak.testing.event.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,9 +20,9 @@ import javax.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.bet.BetOption;
@@ -31,13 +32,17 @@ import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.util.BetOptionStatus;
 import pl.maciejpajak.domain.game.util.CouponStatus;
+import pl.maciejpajak.domain.offers.BidAmountBonus;
 import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
 import pl.maciejpajak.repository.BetOptionRepository;
 import pl.maciejpajak.repository.BetRepository;
+import pl.maciejpajak.repository.BidAmountBonusRepository;
 import pl.maciejpajak.repository.CouponRepository;
 import pl.maciejpajak.repository.GameRepository;
 import pl.maciejpajak.service.TransactionService;
+import pl.maciejpajak.testing.event.event.NotificationType;
+import pl.maciejpajak.testing.event.event.NotifyUserEvent;
 
 @Component
 public class BetResolver {
@@ -58,6 +63,12 @@ public class BetResolver {
     
     @Autowired
     private TransactionService transactionService;
+    
+    @Autowired
+    private BidAmountBonusRepository bidAmountBonusRepository;
+    
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
 
 //    public void resolve(Game game, BetLastCall lastCall) throws ScriptException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     @Async
@@ -125,13 +136,18 @@ public class BetResolver {
         if (isCouponWon(coupon)) {
             log.debug("coupon (id = {}) WON, going go pay out prize", coupon.getId());
             coupon.setStatus(CouponStatus.WON);
-
             payOutPrize(coupon);
         } else {
             log.debug("coupon (id = {}) LOST", coupon.getId());
             coupon.setStatus(CouponStatus.WON);
             coupon.setBonus(BigDecimal.ZERO);
             coupon.setTotalPrize(BigDecimal.ZERO);
+            if (coupon instanceof GroupCoupon) {
+                ((GroupCoupon) coupon).getIntivations().forEach(inv -> {
+                    applicationEventPublisher.publishEvent(new NotifyUserEvent(this, inv.getInvitedUser().getId(), coupon.getId(), NotificationType.COUPON_LOST));
+                });
+            } 
+            applicationEventPublisher.publishEvent(new NotifyUserEvent(this, coupon.getOwner().getId(), coupon.getId(), NotificationType.COUPON_LOST));
         }
         log.debug("saving coupon (id = {})", coupon.getId());
         couponRepository.save(coupon); // TODO check if this works
@@ -155,21 +171,28 @@ public class BetResolver {
         for (PlacedBet pb : coupon.getPlacedBets()) {
             totalPrize = totalPrize.multiply(pb.getOdd().getValue());
         }
-//        totalPrize = totalPrize.multiply(BONUS);
+        BigDecimal bonus = bidAmountBonusRepository
+                .findTopByMinimalBidIsLessThanEqualAndVisibleOrderByMinimalBidDesc(totalPrize, true)
+                .orElse(new BidAmountBonus()).getRelativeRevenuBonus();
+        totalPrize = totalPrize.multiply(bonus.add(BigDecimal.ONE)).setScale(2, RoundingMode.CEILING);
+        coupon.setBonus(bonus);
         coupon.setTotalPrize(totalPrize);
+        log.debug("bonus: {}", bonus);
         log.debug("total prize: {}", totalPrize);
         if (coupon instanceof GroupCoupon) {
             Map<User, BigDecimal> usersAmounts = new HashMap<>();
             usersAmounts.put(coupon.getOwner(), coupon.getOwnerTransaction().getAmount());
             ((GroupCoupon) coupon).getIntivations().forEach(inv -> {
                 usersAmounts.put(inv.getInvitedUser(), inv.getBetTransaction().getAmount());
+                applicationEventPublisher.publishEvent(new NotifyUserEvent(this, inv.getInvitedUser().getId(), coupon.getId(), NotificationType.COUPON_WON));
             });
 //            BigDecimal usersAmounts.values().stream().reduce(BigDecimal.ZERO, (x, y) -> x.add(y));
             usersAmounts.forEach((u, a) -> 
-                transactionService.createTransaction(coupon.getTotalPrize().multiply(a).divide(coupon.getValue()), u, TransactionType.WIN));
+                transactionService.createTransaction(coupon.getTotalPrize().multiply(a).divide(coupon.getValue()).setScale(2, RoundingMode.CEILING), u, TransactionType.WIN));
         } else {
             transactionService.createTransaction(coupon.getTotalPrize(), coupon.getOwner(), TransactionType.WIN);
         }
+        applicationEventPublisher.publishEvent(new NotifyUserEvent(this, coupon.getOwner().getId(), coupon.getId(), NotificationType.COUPON_WON));
     }
     
 }
