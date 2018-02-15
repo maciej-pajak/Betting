@@ -1,6 +1,7 @@
 package pl.maciejpajak.api;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import pl.maciejpajak.domain.bet.Bet;
+import pl.maciejpajak.domain.bet.BetOption;
+import pl.maciejpajak.domain.game.util.BetLastCall;
 import pl.maciejpajak.domain.game.util.EventType;
+import pl.maciejpajak.repository.BetOptionRepository;
+import pl.maciejpajak.repository.BetRepository;
 import pl.maciejpajak.testing.event.EventDto;
 import pl.maciejpajak.testing.event.EventProcessor;
 
@@ -44,5 +50,18 @@ public class EventReceiveRestController {
         ev.setValue(3);
         return ev;
     }
+    
+//    @Autowired
+//    private BetRepository betRepository;
+//    
+//    @Autowired
+//    private BetOptionRepository betOptionRepository;
+//    
+//    @GetMapping("/test")
+//    public Collection<BetOption> test() {
+//        Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(2L, BetLastCall.GAME_END, true);
+//        Collection<BetOption> betOptions = betOptionRepository.findAllByBetInAndVisible(bets, true);
+//        return betOptions;
+//    }
     
 }
