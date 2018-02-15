@@ -1,4 +1,4 @@
-package pl.maciejpajak.api.temp;
+package pl.maciejpajak.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -45,7 +45,6 @@ import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.OddRepository;
 import pl.maciejpajak.repository.UserCouponRepository;
 import pl.maciejpajak.repository.UserRepository;
-import pl.maciejpajak.service.TransactionService;
 
 
 @Service
@@ -210,42 +209,48 @@ public class CouponService {
         return placedBets;
     }
     
-//    @Transactional
-//    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
-//        
-//        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
-//                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        if (!invitation.getInvitedUser().getId().equals(userId)) {
-//            throw new AccessDeniedException("access denied"); // TODO rethink
-//        }
-//        if (invitation.getBetTransaction() != null) {
-//            throw new RuntimeException("invitation has already been accepted");
-//        }
-//        int unacceptedInvitations = invitation.getGroupCoupon().getUnacceptedInvitationsCount() - 1;
-//        invitation.getGroupCoupon().setUnacceptedInvitationsCount(unacceptedInvitations);
-//        log.debug("unaccepted invitations count: {} (after decrementation)", unacceptedInvitations);
-//        Coupon coupon = invitation.getGroupCoupon();
-//        if (unacceptedInvitations == 0) {   // TODO check if this persists to db
-//            coupon.setStatus(CouponStatus.PLACED);
-//        }
-//        coupon.setValue(coupon.getValue().add(amount));
-//        couponRepository.save(coupon);
-//        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
-//        couponInvitationRepository.save(invitation);
-//    }
+    @Transactional
+    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
+        
+        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
+        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
+                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
+        if (!invitation.getInvitedUser().getId().equals(userId)) {
+            throw new AccessDeniedException("access denied"); // TODO rethink
+        }
+        if (invitation.getBetTransaction() != null) {
+            throw new RuntimeException("invitation has already been accepted");
+        }
+        int unacceptedInvitations = invitation.getGroupCoupon().getUnacceptedInvitationsCount() - 1;
+        invitation.getGroupCoupon().setUnacceptedInvitationsCount(unacceptedInvitations);
+        log.debug("unaccepted invitations count: {} (after decrementation)", unacceptedInvitations);
+        Coupon coupon = invitation.getGroupCoupon();
+        if (unacceptedInvitations == 0) {   // TODO check if this persists to db
+            coupon.setStatus(CouponStatus.PLACED);
+        }
+        coupon.setValue(coupon.getValue().add(amount));
+        couponRepository.save(coupon);
+        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
+        couponInvitationRepository.save(invitation);
+    }
     
     @Autowired // FIXME
     private CouponRepository couponRepository;
     
     //TODO maybe async?
-    public void cancelUnacceptedGroupCoupons(Collection<Bet> bets) {
+    public void cancelUnacceptedGroupCoupons(Long gameId) {
 //        groupCouponRepository.findAllByStatusAndPlacedBetsBetsInAndVisible(CouponStatus.PENDING, bets, true)
-        couponRepository.findAllByStatusIsAndPlacedBetsBetOptionBetInAndVisible(CouponStatus.PENDING, bets, true)
-            .stream()
-            .filter(c -> (c instanceof GroupCoupon))
-            .map(c -> (GroupCoupon) c)
-            .forEach(this::cancelGroupCoupon); // TODO Add bets
+        log.debug("canceling unaccepted group coupons");
+//        log.debug("bets size {}", bets.size());
+        groupCouponRepository.findAllByPlacedBetsBetOptionBetGameIdAndStatusAndVisible(gameId, CouponStatus.PENDING, true).forEach(this::cancelGroupCoupon);
+//        log.debug("xxx {}",groupCouponRepository.findAllByPlacedBetsBetOptionBetInAndStatusIsAndVisible(bets, CouponStatus.PENDING, true).size());
+//        
+//        log.debug("xxx {}",groupCouponRepository.findAllByPlacedBetsBetOptionBetIn(bets).size());
+//        couponRepository.findAllByStatusIsAndPlacedBetsBetOptionBetInAndVisible(CouponStatus.PENDING, bets, true)
+//            .stream()
+//            .filter(c -> (c instanceof GroupCoupon))
+//            .map(c -> (GroupCoupon) c)
+//            .forEach(this::cancelGroupCoupon); // TODO Add bets
     }
     
     private void cancelGroupCoupon(GroupCoupon groupCoupon) {

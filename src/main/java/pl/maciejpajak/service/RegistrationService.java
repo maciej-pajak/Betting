@@ -1,4 +1,4 @@
-package pl.maciejpajak.api.temp;
+package pl.maciejpajak.service;
 
 import java.math.BigDecimal;
 import java.util.Collections;

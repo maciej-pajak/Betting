@@ -1,4 +1,4 @@
-package pl.maciejpajak.api.temp;
+package pl.maciejpajak.service;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -22,7 +22,6 @@ import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.CouponInvitationRepository;
 import pl.maciejpajak.repository.CouponRepository;
 import pl.maciejpajak.repository.UserRepository;
-import pl.maciejpajak.service.TransactionService;
 
 @Service
 public class CouponInvitationService {

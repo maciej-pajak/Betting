@@ -16,4 +16,11 @@ public interface GroupCouponRepository extends JpaRepository<GroupCoupon, Long>{
     public List<GroupCoupon> findAllByIntivationsInvitedUserIdAndVisible(Long userId, boolean isVisible);
 //    public List<GroupCoupon> findAllByStatusPENDINGAndVisible(boolean isVisible);
 //    public List<GroupCoupon> findAllByStatusAndPlacedBetsBetsInAndVisible(CouponStatus couponStatus, Collection<Bet> bets, boolean isVisible);
+//    public List<GroupCoupon> findAllByPlacedBetsBetOptionBetInAndStatusIsAndVisible(Collection<Bet> bets, CouponStatus couponStatus, boolean isVisible);
+//    
+//    
+//    public List<GroupCoupon> findAllByPlacedBetsBetOptionBetIn(Collection<Bet> bets);
+    
+    
+    public List<GroupCoupon> findAllByPlacedBetsBetOptionBetGameIdAndStatusAndVisible(Long gameId, CouponStatus couponStatus, boolean isVisible);
 }

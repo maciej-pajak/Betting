@@ -13,7 +13,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import pl.maciejpajak.api.temp.CouponService;
 import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.game.Game;
@@ -35,6 +34,7 @@ import pl.maciejpajak.repository.GameRepository;
 import pl.maciejpajak.repository.GameScoreRepository;
 import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.PartScoreRepository;
+import pl.maciejpajak.service.CouponService;
 import pl.maciejpajak.service.TransactionService;
 import pl.maciejpajak.testing.event.EventDto;
 import pl.maciejpajak.testing.event.event.GameEvent;
@@ -104,12 +104,12 @@ public class GameEventHandler {
     
     private void startGame(Game game, EventDto eventDto) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
         Collection<Bet> bets = updateBets(game, BetLastCall.GAME_START);
-        // cancel group bets wich were not fully accepted before game start
-        couponService.cancelUnacceptedGroupCoupons(bets);
+        // cancel group bets which were not fully accepted before game start
+        couponService.cancelUnacceptedGroupCoupons(game.getId());
         // update status
         game.setStatus(GameStatus.LIVE);
         gameRepository.save(game);
-        // create inital game score 0 : 0
+        // create initial game score 0 : 0
         gameScoreRepository.save(new GameScore(null, 0, 0, eventDto.getTime(), game));
         // create new game part
         createGamePart(game, eventDto);

@@ -16,12 +16,12 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.transaction.Transactional;
 
-import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.bet.BetOption;
@@ -60,7 +60,8 @@ public class BetResolver {
     private TransactionService transactionService;
 
 //    public void resolve(Game game, BetLastCall lastCall) throws ScriptException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//    @Async
+    @Async
+    @Transactional(rollbackOn = {})
     public void resolve(Game game, Collection<Bet> bets) throws ScriptException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         // make bets with lastCall unbetable
 //        Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(game.getId(), lastCall, true);
@@ -68,7 +69,7 @@ public class BetResolver {
 //        betRepository.save(bets);
         
         Long start = System.nanoTime();
-        
+
         ScriptEngineManager mgr = new ScriptEngineManager();
         ScriptEngine engine = mgr.getEngineByName("JavaScript");
         
@@ -103,10 +104,14 @@ public class BetResolver {
         Long stop = (System.nanoTime() - start) / 1000000;
         log.debug("bets resolving time {} ms", stop);
     }
-
+    
+//    @Transactional
     private void updateCouponByBetOption(BetOption betOption) {
-        Collection<Coupon> coupons = couponRepository.findAllByPlacedBetsBetOptionId(betOption.getId()); // TODO maybe add byStatus = UNRESOLVED?
+        
+        Collection<Coupon> coupons = couponRepository.findAllByStatusAndPlacedBetsBetOptionIdAndVisible(CouponStatus.PLACED, betOption.getId(), true);
+        log.debug("found coupons {} for betOption id = {}", coupons.size(), betOption.getId());
         coupons.forEach(c -> {
+            log.debug("setting unsersolvedBetsCount for coupon (id = {}) to {}", c.getId(), c.getUnsersolvedBetsCount() - 1); 
             c.setUnsersolvedBetsCount(c.getUnsersolvedBetsCount() - 1);
             couponRepository.save(c);
             if (c.getUnsersolvedBetsCount() == 0) {
@@ -114,24 +119,26 @@ public class BetResolver {
             } 
         });
     }
-    
+//    @Transactional
     private void resolveCoupon(Coupon coupon) {
+        log.debug("resolving coupon (id = {})", coupon.getId());
         if (isCouponWon(coupon)) {
+            log.debug("coupon (id = {}) WON, going go pay out prize", coupon.getId());
             coupon.setStatus(CouponStatus.WON);
-            
-            
-            
+
             payOutPrize(coupon);
         } else {
+            log.debug("coupon (id = {}) LOST", coupon.getId());
             coupon.setStatus(CouponStatus.WON);
             coupon.setBonus(BigDecimal.ZERO);
             coupon.setTotalPrize(BigDecimal.ZERO);
         }
-        
+        log.debug("saving coupon (id = {})", coupon.getId());
         couponRepository.save(coupon); // TODO check if this works
     }
-    
+//    @Transactional
     private boolean isCouponWon(Coupon coupon) {
+        log.debug("checking id coupon (id = {}) is won", coupon.getId());
         boolean isCouponWon = true;
         for (PlacedBet pb : coupon.getPlacedBets()) {
             if(pb.getBetOption().getStatus().equals(BetOptionStatus.LOST)) {
@@ -141,15 +148,16 @@ public class BetResolver {
         }
         return isCouponWon;
     }
-    
+
     private void payOutPrize(Coupon coupon) {
+        log.debug("inside payOutPrize for coupon (id = {})", coupon.getId());
         BigDecimal totalPrize = coupon.getValue();
         for (PlacedBet pb : coupon.getPlacedBets()) {
             totalPrize = totalPrize.multiply(pb.getOdd().getValue());
         }
 //        totalPrize = totalPrize.multiply(BONUS);
         coupon.setTotalPrize(totalPrize);
-        
+        log.debug("total prize: {}", totalPrize);
         if (coupon instanceof GroupCoupon) {
             Map<User, BigDecimal> usersAmounts = new HashMap<>();
             usersAmounts.put(coupon.getOwner(), coupon.getOwnerTransaction().getAmount());

@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import pl.maciejpajak.api.dto.AcceptCouponInvitationDto;
-import pl.maciejpajak.api.temp.CouponInvitationService;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.security.CurrentUser;
+import pl.maciejpajak.service.CouponInvitationService;
 
 @RestController
 @RequestMapping("/coupon-invitations")

@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.maciejpajak.api.temp.GameService;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.score.GameScore;
 import pl.maciejpajak.domain.game.score.PartScore;
 import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.service.GameService;
 
 @RestController
 @RequestMapping("/games")

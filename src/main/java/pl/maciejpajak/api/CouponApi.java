@@ -20,8 +20,8 @@ import pl.maciejpajak.api.dto.BetOptionWithOddDto;
 import pl.maciejpajak.api.dto.CouponPlaceDto;
 import pl.maciejpajak.api.dto.CouponShowDto;
 import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
-import pl.maciejpajak.api.temp.CouponService;
 import pl.maciejpajak.security.CurrentUser;
+import pl.maciejpajak.service.CouponService;
 
 @RestController
 @RequestMapping("/coupons")

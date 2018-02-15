@@ -30,13 +30,14 @@ public class TransactionService {
     }
 
     public Transaction createTransaction(BigDecimal amount, User user, TransactionType type) {
-        if(user.getBalance().compareTo(amount) < 0) {
+        
+        if(user.getBalance().add(type.addSign(amount)).compareTo(BigDecimal.ZERO) < 0) {
             throw new InsufficientFundsException();
         }
         
         Transaction transaction = 
                 Transaction.builder()
-                    .amount(amount)
+                    .amount(type.addSign(amount))
                     .operationTime(LocalDateTime.now())
                     .owner(user)
                     .visible(true)
@@ -46,7 +47,7 @@ public class TransactionService {
         // save transaction
         transactionRepository.saveAndFlush(transaction);
         // set user balance
-        user.setBalance(user.getBalance().subtract(amount));
+        user.setBalance(user.getBalance().add(type.addSign(amount)));
         userRepository.saveAndFlush(user);
         return transaction;
     }

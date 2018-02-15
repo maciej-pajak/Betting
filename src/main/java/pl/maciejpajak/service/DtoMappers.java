@@ -1,4 +1,4 @@
-package pl.maciejpajak.api.temp;
+package pl.maciejpajak.service;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
