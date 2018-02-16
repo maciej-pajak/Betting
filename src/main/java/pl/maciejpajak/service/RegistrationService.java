@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import pl.maciejpajak.api.dto.UserRegistrationDto;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.dto.UserRegistrationDto;
 import pl.maciejpajak.exception.LoginOrEmailAlreadyTakenException;
 import pl.maciejpajak.repository.RoleRepository;
 import pl.maciejpajak.repository.UserRepository;

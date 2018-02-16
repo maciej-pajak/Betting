@@ -12,9 +12,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import pl.maciejpajak.domain.bet.PlacedBet;
-import pl.maciejpajak.domain.game.util.CouponStatus;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.domain.util.CouponStatus;
 
 @Entity
 @Getter

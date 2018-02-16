@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import pl.maciejpajak.domain.game.Game;
-import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.domain.util.GameStatus;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
     

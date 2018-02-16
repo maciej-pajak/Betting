@@ -20,8 +20,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.score.PartScore;
-import pl.maciejpajak.domain.game.util.GameResult;
-import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.domain.util.GameResult;
+import pl.maciejpajak.domain.util.GameStatus;
 
 @Entity
 @Getter

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.maciejpajak.api.dto.BetDto;
+import pl.maciejpajak.dto.BetDto;
 import pl.maciejpajak.service.BetService;
 
 @RestController

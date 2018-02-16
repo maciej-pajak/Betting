@@ -3,13 +3,13 @@ package pl.maciejpajak.service;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import pl.maciejpajak.api.dto.CouponInvitationShowDto;
-import pl.maciejpajak.api.dto.CouponShowDto;
-import pl.maciejpajak.api.dto.PlacedBetShowDto;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
+import pl.maciejpajak.dto.CouponInvitationShowDto;
+import pl.maciejpajak.dto.CouponShowDto;
+import pl.maciejpajak.dto.PlacedBetShowDto;
 
 public final class DtoMappers {
 

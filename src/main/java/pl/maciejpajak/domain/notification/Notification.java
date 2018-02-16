@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,6 +33,7 @@ public class Notification {
     
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
     
     private String message;
@@ -38,6 +41,7 @@ public class Notification {
     private LocalDateTime created;
     
     @Column(name = "is_read")
+    @JsonIgnore
     private boolean read;
     
     private Long objectId;

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.score.GameScore;
 import pl.maciejpajak.domain.game.score.PartScore;
-import pl.maciejpajak.domain.game.util.GameStatus;
+import pl.maciejpajak.domain.util.GameStatus;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.GamePartRepository;
 import pl.maciejpajak.repository.GameRepository;

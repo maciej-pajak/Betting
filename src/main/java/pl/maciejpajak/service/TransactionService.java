@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import pl.maciejpajak.repository.UserRepository;
 @Service
 @Transactional
 public class TransactionService {
+    
+    private static final Logger log = LoggerFactory.getLogger(TransactionService.class);
     
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
@@ -43,7 +47,9 @@ public class TransactionService {
                     .visible(true)
                     .type(type)
                     .build();
-        
+        log.debug("amount: {}", amount);
+        log.debug("creating transaction: {}", transaction);
+        log.debug("amount: {}", transaction.getAmount());
         // save transaction
         transactionRepository.saveAndFlush(transaction);
         // set user balance

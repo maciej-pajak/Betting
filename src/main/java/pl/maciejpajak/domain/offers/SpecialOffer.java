@@ -12,6 +12,11 @@ import javax.persistence.ManyToOne;
 
 import pl.maciejpajak.domain.user.User;
 
+/**
+ * not implemented yet
+ * @author mac
+ *
+ */
 @Entity
 public class SpecialOffer {
 

@@ -8,19 +8,11 @@ import javax.persistence.Entity;
 
 import lombok.Builder;
 import pl.maciejpajak.domain.bet.PlacedBet;
-import pl.maciejpajak.domain.game.util.CouponStatus;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.domain.util.CouponStatus;
 
 @Entity
-//@Polymorphism(type = PolymorphismType.EXPLICIT)
-//@Inheritance(strategy = InheritanceType.JOINED)
-////@DiscriminatorColumn(name = "coupon_type")
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
 public class UserCoupon extends Coupon {
 
     public UserCoupon() {

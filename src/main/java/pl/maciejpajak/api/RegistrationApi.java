@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.maciejpajak.api.dto.UserRegistrationDto;
+import pl.maciejpajak.dto.UserRegistrationDto;
 import pl.maciejpajak.service.RegistrationService;
 
 @RestController

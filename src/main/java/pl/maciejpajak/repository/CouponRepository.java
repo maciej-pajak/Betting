@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.coupon.Coupon;
-import pl.maciejpajak.domain.game.util.CouponStatus;
+import pl.maciejpajak.domain.util.CouponStatus;
 
 public interface CouponRepository extends JpaRepository<Coupon, Long>{
 

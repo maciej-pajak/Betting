@@ -50,6 +50,7 @@ public class Competition {
     
     // this is only for jparepository to generate correct find function, can be removed and replaced with custom @Query
     @OneToMany(mappedBy = "competition")  
+    @JsonIgnore
     private Set<CompetitionPreference> competitionPreferences;
     
 }

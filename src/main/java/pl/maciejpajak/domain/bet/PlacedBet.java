@@ -1,8 +1,6 @@
 package pl.maciejpajak.domain.bet;
 
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.coupon.Coupon;
-import pl.maciejpajak.domain.game.util.BetOptionStatus;
 
 @Entity
 @Getter

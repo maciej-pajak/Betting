@@ -15,23 +15,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
-import pl.maciejpajak.api.dto.BetOptionWithOddDto;
-import pl.maciejpajak.api.dto.BidAmountBonusDto;
-import pl.maciejpajak.api.dto.CouponPlaceDto;
-import pl.maciejpajak.api.dto.CouponShowDto;
-import pl.maciejpajak.api.dto.GroupCouponPlaceDto;
 import pl.maciejpajak.domain.bet.BetOption;
 import pl.maciejpajak.domain.bet.Odd;
 import pl.maciejpajak.domain.bet.PlacedBet;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
 import pl.maciejpajak.domain.coupon.GroupCoupon;
 import pl.maciejpajak.domain.coupon.UserCoupon;
-import pl.maciejpajak.domain.game.util.CouponStatus;
-import pl.maciejpajak.domain.game.util.GameStatus;
-import pl.maciejpajak.domain.offers.BidAmountBonus;
 import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.domain.util.CouponStatus;
+import pl.maciejpajak.domain.util.GameStatus;
+import pl.maciejpajak.domain.util.NotificationType;
+import pl.maciejpajak.dto.BetOptionWithOddDto;
+import pl.maciejpajak.dto.BidAmountBonusDto;
+import pl.maciejpajak.dto.CouponPlaceDto;
+import pl.maciejpajak.dto.CouponShowDto;
+import pl.maciejpajak.dto.GroupCouponPlaceDto;
+import pl.maciejpajak.event.NotifyUserEvent;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.exception.BetClosedException;
 import pl.maciejpajak.exception.BetsCombinationNotAllowedException;
@@ -43,8 +44,6 @@ import pl.maciejpajak.repository.GroupCouponRepository;
 import pl.maciejpajak.repository.OddRepository;
 import pl.maciejpajak.repository.UserCouponRepository;
 import pl.maciejpajak.repository.UserRepository;
-import pl.maciejpajak.testing.event.event.NotificationType;
-import pl.maciejpajak.testing.event.event.NotifyUserEvent;
 
 
 @Service
@@ -71,7 +70,8 @@ public class CouponService {
     
 
     public Collection<CouponShowDto> findAllIndividualCoupons(Long userId) {
-        return null; // TODO
+        return userCouponRepository.findAllByOwnerIdAndVisible(userId, true).stream()
+                .map(DtoMappers.convertUserCouponToDto).collect(Collectors.toList());
     }
     
     public Collection<CouponShowDto> findAllGroupCoupons(Long userId) {
@@ -99,13 +99,6 @@ public class CouponService {
                                 .build()).collect(Collectors.toList());
     }
 
-//    public CouponShowDto findOneById(Long id) {
-//        UserCoupon userCoupon = couponRepository.findOneByIdAndVisible(id, true)
-//                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        if (userCoupon.getOwner().getId().equals(obj))
-//        return 
-//    }
-    
     @Transactional
     public void createCoupon(CouponPlaceDto couponDto, Long userId) {
         User user = userRepository.findOneById(userId).orElseThrow(() -> new BaseEntityNotFoundException(userId));
@@ -119,10 +112,9 @@ public class CouponService {
                     .visible(true)
                     .build();
             groupCoupon.setUnsersolvedBetsCount(groupCoupon.getPlacedBets().size());
-            groupCoupon.setValue(groupCoupon.getOwnerTransaction().getAmount()); // initial value, this will be increased when coupon inviatation is accepted
+            groupCoupon.setValue(couponDto.getAmount()); // initial value, this will be increased when coupon inviatation is accepted
             
             groupCoupon.getPlacedBets().forEach(pb -> pb.setCoupon(groupCoupon));
-            // TODO add total value
         
             sendInvitations(groupCoupon, (GroupCouponPlaceDto) couponDto);
             groupCouponRepository.saveAndFlush(groupCoupon);
@@ -132,13 +124,10 @@ public class CouponService {
                     .placedBets(prepareAndValidateBets(couponDto))
                     .owner(user)
                     .ownerTransaction(transactionService.createTransaction(couponDto.getAmount(), user, TransactionType.PLACE_BET))
-//                    .bonus(bidAmountBonusRepository
-//                            .findTopByMinimalBidIsLessThanEqualAndVisibleOrderByMinimalBidDesc(couponDto.getAmount(), true)
-//                                .orElse(new BidAmountBonus()).getRelativeRevenuBonus())
                     .status(CouponStatus.PLACED)
                     .visible(true)
                     .build();
-            userCoupon.setValue(userCoupon.getOwnerTransaction().getAmount());
+            userCoupon.setValue(couponDto.getAmount());
             userCoupon.setUnsersolvedBetsCount(userCoupon.getPlacedBets().size());
             userCoupon.getPlacedBets().forEach(pb -> pb.setCoupon(userCoupon));
             
@@ -164,6 +153,7 @@ public class CouponService {
                        .groupCoupon(coupon)
                        .build()
                     );
+            // TODO notify user about invitation
         }
         if (invitations.isEmpty()) {
             throw new RuntimeException("no user is invited for this bet");
@@ -189,8 +179,6 @@ public class CouponService {
                     throw new GameHasAlreadyStartedException();
                 }
             }
-//            Odd odd = oddRepository.findOneById(b.getOddId())
-//                    .orElseThrow(() -> new BaseEntityNotFoundException(b.getBetOptionId()));
             Odd latestOdd = oddRepository.findFirstByBetOptionIdOrderByCreatedDesc(b.getBetOptionId())
                     .orElseThrow(() -> new BaseEntityNotFoundException(b.getBetOptionId()));
             // if odd has changes since coupon was send and user doesn't accept odd change throw exception
@@ -225,7 +213,7 @@ public class CouponService {
         return placedBets;
     }
     
-    //TODO maybe async?
+    @Transactional
     public void cancelUnacceptedGroupCoupons(Long gameId) {
         log.debug("canceling unaccepted group coupons");
         groupCouponRepository.findAllByPlacedBetsBetOptionBetGameIdAndStatusAndVisible(gameId, CouponStatus.PENDING, true).forEach(this::cancelGroupCoupon);
@@ -233,6 +221,7 @@ public class CouponService {
     
     private void cancelGroupCoupon(GroupCoupon groupCoupon) {
         log.debug("cancelling coupon with id = {}", groupCoupon.getId());
+        transactionService.createTransaction(groupCoupon.getOwnerTransaction().getAmount().negate(), groupCoupon.getOwner(), TransactionType.CANCEL_BET);
         groupCoupon.getIntivations().forEach(inv -> {
             Transaction t = inv.getBetTransaction();
             if (t != null) {

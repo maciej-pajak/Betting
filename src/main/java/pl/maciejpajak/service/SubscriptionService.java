@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import pl.maciejpajak.api.dto.CompetitionSubscriptionDto;
-import pl.maciejpajak.api.dto.PartySubscriptionDto;
-import pl.maciejpajak.api.dto.SubscriptionDto;
 import pl.maciejpajak.domain.game.Competition;
 import pl.maciejpajak.domain.game.PlayingParty;
 import pl.maciejpajak.domain.user.CompetitionPreference;
 import pl.maciejpajak.domain.user.PartyPreference;
 import pl.maciejpajak.domain.user.Preference;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.dto.CompetitionSubscriptionDto;
+import pl.maciejpajak.dto.PartySubscriptionDto;
+import pl.maciejpajak.dto.SubscriptionDto;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.CompetitionPreferenceRepository;
 import pl.maciejpajak.repository.PartyPreferenceRepository;

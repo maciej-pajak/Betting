@@ -19,9 +19,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.score.GameScore;
-import pl.maciejpajak.domain.game.util.GameResult;
-import pl.maciejpajak.domain.game.util.GameStatus;
-import pl.maciejpajak.domain.game.util.ScoreType;
+import pl.maciejpajak.domain.util.GameResult;
+import pl.maciejpajak.domain.util.GameStatus;
+import pl.maciejpajak.domain.util.ScoreType;
 
 @Entity
 @Getter

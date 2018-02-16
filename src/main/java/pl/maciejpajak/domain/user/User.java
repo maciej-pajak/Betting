@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
-import pl.maciejpajak.domain.coupon.UserCoupon;
 import pl.maciejpajak.domain.offers.SpecialOffer;
 import pl.maciejpajak.security.Role;
 

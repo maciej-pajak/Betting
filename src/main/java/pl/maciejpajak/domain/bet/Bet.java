@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.maciejpajak.domain.game.Game;
-import pl.maciejpajak.domain.game.util.BetLastCall;
+import pl.maciejpajak.domain.util.BetLastCall;
 
 @Entity
 @Getter

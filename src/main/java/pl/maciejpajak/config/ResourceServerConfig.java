@@ -25,17 +25,14 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
             .antMatchers("/coupons/**").authenticated()
             .antMatchers("/coupon-invitations").authenticated()
             .antMatchers("/subscriptions/**").authenticated()
+            .antMatchers("/notifications/**").authenticated()
             .antMatchers("/register").permitAll()
             .antMatchers("/**").permitAll();
-            
     }
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
         resources.resourceId(resourceId);
     }
-    
-    
-
 
 }

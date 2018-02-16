@@ -1,6 +1,5 @@
 package pl.maciejpajak.service;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 
 import javax.transaction.Transactional;
@@ -11,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import pl.maciejpajak.api.dto.AcceptCouponInvitationDto;
 import pl.maciejpajak.domain.coupon.Coupon;
 import pl.maciejpajak.domain.coupon.CouponInvitation;
-import pl.maciejpajak.domain.game.util.CouponStatus;
-import pl.maciejpajak.domain.user.Transaction;
 import pl.maciejpajak.domain.user.TransactionType;
 import pl.maciejpajak.domain.user.User;
+import pl.maciejpajak.domain.util.CouponStatus;
+import pl.maciejpajak.dto.AcceptCouponInvitationDto;
 import pl.maciejpajak.exception.BaseEntityNotFoundException;
 import pl.maciejpajak.repository.CouponInvitationRepository;
 import pl.maciejpajak.repository.CouponRepository;
@@ -59,7 +57,7 @@ public class CouponInvitationService {
         CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationDto.getCouponInvitationId(), true)
                 .orElseThrow(() -> new BaseEntityNotFoundException(userId));
         if (!invitation.getInvitedUser().getId().equals(userId)) {
-            throw new AccessDeniedException("access denied"); // TODO rethink
+            throw new AccessDeniedException("access denied");
         }
         if (invitation.getBetTransaction() != null) {
             throw new RuntimeException("invitation has already been accepted");
@@ -68,38 +66,15 @@ public class CouponInvitationService {
         invitation.getGroupCoupon().setUnacceptedInvitationsCount(unacceptedInvitations);
         log.debug("unaccepted invitations count: {} (after decrementation)", unacceptedInvitations);
         Coupon coupon = invitation.getGroupCoupon();
-        if (unacceptedInvitations == 0) {   // TODO check if this persists to db
+        if (unacceptedInvitations == 0) {
             coupon.setStatus(CouponStatus.PLACED);
         }
+        log.debug("coupon value before invitation acceptance: {}", coupon.getValue());
         coupon.setValue(coupon.getValue().add(invitationDto.getAmount()));
-//        couponRepository.save(coupon);
+        log.debug("coupon value after invitation acceptance: {}", coupon.getValue());
+        couponRepository.save(coupon);
         invitation.setBetTransaction(transactionService.createTransaction(invitationDto.getAmount(), user, TransactionType.PLACE_BET));
         couponInvitationRepository.save(invitation);
     }
-    
-//    @Transactional
-//    public void acceptCouponInvitation(Long userId, Long invitationId, BigDecimal amount) {
-//        
-//        User user = userRepository.findOneByIdAndVisible(userId, true).orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        CouponInvitation invitation = couponInvitationRepository.findOneByIdAndVisible(invitationId, true)
-//                .orElseThrow(() -> new BaseEntityNotFoundException(userId));
-//        if (!invitation.getInvitedUser().getId().equals(userId)) {
-//            throw new AccessDeniedException("access denied"); // TODO rethink
-//        }
-//        if (invitation.getBetTransaction() != null) {
-//            throw new RuntimeException("invitation has already been accepted");
-//        }
-//        int unacceptedInvitations = invitation.getGroupCoupon().getUnacceptedInvitationsCount() - 1;
-//        invitation.getGroupCoupon().setUnacceptedInvitationsCount(unacceptedInvitations);
-//        log.debug("unaccepted invitations count: {} (after decrementation)", unacceptedInvitations);
-//        Coupon coupon = invitation.getGroupCoupon();
-//        if (unacceptedInvitations == 0) {   // TODO check if this persists to db
-//            coupon.setStatus(CouponStatus.PLACED);
-//        }
-//        coupon.setValue(coupon.getValue().add(amount));
-//        couponRepository.save(coupon);
-//        invitation.setBetTransaction(transactionService.createTransaction(amount, user, TransactionType.PLACE_BET));
-//        couponInvitationRepository.save(invitation);
-//    }
     
 }

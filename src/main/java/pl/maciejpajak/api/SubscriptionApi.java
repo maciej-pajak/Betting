@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import pl.maciejpajak.api.dto.SubscriptionDto;
+import pl.maciejpajak.dto.SubscriptionDto;
 import pl.maciejpajak.security.CurrentUser;
 import pl.maciejpajak.service.SubscriptionService;
 
@@ -49,6 +49,5 @@ public class SubscriptionApi {
                         @AuthenticationPrincipal CurrentUser principal) {
         subscriptionService.unsubscribe(principal.getId(), subscriptionId);
     }
-    
     
 }

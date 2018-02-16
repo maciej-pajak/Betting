@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
 import lombok.Setter;
-import pl.maciejpajak.domain.game.util.BetOptionStatus;
+import pl.maciejpajak.domain.util.BetOptionStatus;
 
 @Entity
 @Getter

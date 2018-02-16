@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import pl.maciejpajak.domain.bet.Bet;
-import pl.maciejpajak.domain.game.util.BetLastCall;
+import pl.maciejpajak.domain.util.BetLastCall;
 
 public interface BetRepository extends JpaRepository<Bet, Long> {
 
@@ -16,4 +16,5 @@ public interface BetRepository extends JpaRepository<Bet, Long> {
     
     public Collection<Bet> findAllByGameIdAndLastCallAndVisible(Long gameId, BetLastCall lastCall, boolean isVisible) ;
     
+    public Collection<Bet> findAllByGameIdAndVisible(Long gameId, boolean isVisible);
 }
