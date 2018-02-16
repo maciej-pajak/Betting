@@ -18,6 +18,7 @@ import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.util.BetLastCall;
 import pl.maciejpajak.domain.game.util.EventType;
 import pl.maciejpajak.repository.GameRepository;
+import pl.maciejpajak.testing.SubscriptionMailGenerator;
 import pl.maciejpajak.testing.event.EventDto;
 import pl.maciejpajak.testing.event.EventProcessor;
 import pl.maciejpajak.testing.event.handler.BetResolver;
@@ -68,6 +69,13 @@ public class EventReceiveRestController {
     public void res() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
 //        Game game = gamerepository.findOne(1L);
 //        resolver.resolve(game, BetLastCall.GAME_END);
+    }
+    
+    @Autowired
+    private SubscriptionMailGenerator mailGen;
+    @GetMapping("/mail")
+    public void mail() {
+        mailGen.sendSubscriptions();
     }
     
 //    

@@ -32,6 +32,6 @@ public abstract class Preference {
     
     private double rating; // TODO
     
-    private boolean subsribed;
+    private boolean subscribed;
 
 }

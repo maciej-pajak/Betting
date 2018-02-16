@@ -33,7 +33,7 @@ public class SubscriptionService {
     private PartyPreferenceRepository partyPreferenceRepository;
     
     public Collection<SubscriptionDto> findUserSubscriptions(Long userId) {
-        return preferenceRepository.findAllBySubsribedAndUserId(true, userId).stream().map(pref -> {
+        return preferenceRepository.findAllBySubscribedAndUserId(true, userId).stream().map(pref -> {
             if (pref instanceof PartyPreference) {
                 return PartySubscriptionDto.builder()
                         .id(pref.getId())
@@ -56,24 +56,24 @@ public class SubscriptionService {
                         .user(User.builder().id(userId).build())
                         .competition(Competition.builder().id(competitionId).build())
                         .build());
-        cp.setSubsribed(true);
+        cp.setSubscribed(true);
         competitionPreferenceRepository.save(cp);
     }
     
     public void subscribeParty(Long userId, Long partyId) {
-        PartyPreference cp = partyPreferenceRepository.findOneByPartyIdAndUserId(partyId, userId)
+        PartyPreference cp = partyPreferenceRepository.findOneByPlayingPartyIdAndUserId(partyId, userId)
             .orElse(PartyPreference.builder()
                         .user(User.builder().id(userId).build())
                         .playingParty(PlayingParty.builder().id(partyId).build())
                         .build());
-        cp.setSubsribed(true);
+        cp.setSubscribed(true);
         partyPreferenceRepository.save(cp);
     }
     
     public void unsubscribe(Long userId, Long subscriptionId) {
-        Preference pref = preferenceRepository.findOneByIdAndUserIdAndSubsribed(subscriptionId, userId, true)
+        Preference pref = preferenceRepository.findOneByIdAndUserIdAndSubscribed(subscriptionId, userId, true)
                                 .orElseThrow(() -> new BaseEntityNotFoundException(subscriptionId));
-        pref.setSubsribed(false);
+        pref.setSubscribed(false);
         preferenceRepository.save(pref);
     }
 

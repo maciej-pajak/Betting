@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.maciejpajak.domain.user.CompetitionPreference;
 
 @Entity
 @Getter
@@ -46,5 +47,9 @@ public class Competition {
     @JsonIgnore
     @OneToMany(mappedBy = "competition")
     private Set<Game> games;
+    
+    // this is only for jparepository to generate correct find function, can be removed and replaced with custom @Query
+    @OneToMany(mappedBy = "competition")  
+    private Set<CompetitionPreference> competitionPreferences;
     
 }

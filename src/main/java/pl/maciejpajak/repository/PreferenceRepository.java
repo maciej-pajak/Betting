@@ -9,7 +9,7 @@ import pl.maciejpajak.domain.user.Preference;
 
 public interface PreferenceRepository extends JpaRepository<Preference, Long> {
 
-    public Collection<Preference> findAllBySubsribedAndUserId(boolean isSubscribed, Long userId);
-    public Optional<Preference> findOneByIdAndUserIdAndSubsribed(Long subscriptionId, Long userId, boolean isVisible);
+    public Collection<Preference> findAllBySubscribedAndUserId(boolean isSubscribed, Long userId);
+    public Optional<Preference> findOneByIdAndUserIdAndSubscribed(Long subscriptionId, Long userId, boolean isVisible);
     
 }
