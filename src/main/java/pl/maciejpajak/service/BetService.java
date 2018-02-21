@@ -15,8 +15,13 @@ import pl.maciejpajak.repository.BetRepository;
 @Service
 public class BetService {
     
-    @Autowired
     private BetRepository betRepository;
+   
+    @Autowired
+    public BetService(BetRepository betRepository) {
+        super();
+        this.betRepository = betRepository;
+    }
 
     public BetDto findOneById(Long betId) {
         return convertToDto.apply(
@@ -30,7 +35,7 @@ public class BetService {
         return bets.stream().map(convertToDto).collect(Collectors.toList());
     }
     
-    private Function<Bet, BetDto> convertToDto = 
+    private final Function<Bet, BetDto> convertToDto = 
             b -> BetDto.builder()
                 .id(b.getId())
                 .description(b.getDescription())
