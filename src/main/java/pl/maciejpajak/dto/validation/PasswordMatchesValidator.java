@@ -5,6 +5,11 @@ import javax.validation.ConstraintValidatorContext;
 
 import pl.maciejpajak.dto.UserRegistrationDto;
 
+/**
+ * Validates if password and password repetitions are equal.
+ * @author mac
+ *
+ */
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
 
     @Override

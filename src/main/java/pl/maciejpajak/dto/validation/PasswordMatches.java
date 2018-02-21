@@ -11,6 +11,11 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+/**
+ * Used to validate equality password and password repetition in user registration.
+ * @author mac
+ *
+ */
 @Target({ TYPE, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 @Constraint(validatedBy = PasswordMatchesValidator.class)
