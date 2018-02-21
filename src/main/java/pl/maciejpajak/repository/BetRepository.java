@@ -22,8 +22,9 @@ public interface BetRepository extends JpaRepository<Bet, Long> {
     public Collection<Bet> findAllByGameIdAndVisible(Long gameId, boolean isVisible);
     
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Bet b SET b.betable = :betable WHERE b.game.id = :gameId AND b.visible = :isVisible")
+    @Query("UPDATE Bet b SET b.betable = :betable WHERE b.game.id = :gameId AND b.lastCall = :lastCall AND b.visible = :isVisible")
     public Integer updateBetableFlag(  @Param("betable") boolean betable,
                                     @Param("gameId") Long gameId,
+                                    @Param("lastCall") BetLastCall lastCall,
                                     @Param("isVisible") boolean isVisible);
 }

@@ -11,6 +11,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.game.Game;
+import pl.maciejpajak.domain.util.BetLastCall;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -30,12 +31,13 @@ public class BetRepositoryTest {
         Bet bet = new Bet();
         bet.setBetable(true);
         bet.setVisible(true);
+        bet.setLastCall(BetLastCall.GAME_END);
         bet.setGame(game);
 
         entityManager.persist(bet); 
         
         // when
-        betRepository.updateBetableFlag(false, game.getId(), true);
+        betRepository.updateBetableFlag(false, game.getId(), BetLastCall.GAME_END, true);
         Bet result = (Bet) entityManager.find(Bet.class, bet.getId());
 
         // then
