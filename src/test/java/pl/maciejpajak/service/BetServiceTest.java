@@ -58,7 +58,7 @@ public class BetServiceTest {
         Optional<Bet> opt = Optional.empty();
         when(betRepositoryMock.findOneByIdAndVisible(id, true)).thenReturn(opt);
         // when
-        BetDto result = betService.findOneById(id);
+        betService.findOneById(id);
     }
 
 }
