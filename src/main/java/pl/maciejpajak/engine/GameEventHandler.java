@@ -2,7 +2,6 @@ package pl.maciejpajak.engine;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
-import java.util.Collection;
 
 import javax.script.ScriptException;
 
@@ -11,7 +10,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import pl.maciejpajak.domain.bet.Bet;
 import pl.maciejpajak.domain.game.Game;
 import pl.maciejpajak.domain.game.GamePart;
 import pl.maciejpajak.domain.game.score.GameScore;
@@ -88,15 +86,13 @@ public class GameEventHandler {
             break;
         }
     }
+
+    private void updateBets(Game game, BetLastCall lastCall) {
+      betRepository.updateBetableFlag(false, game.getId(), lastCall, true);
+  }
     
-    private Collection<Bet> updateBets(Game game, BetLastCall lastCall) {
-        Collection<Bet> bets = betRepository.findAllByGameIdAndLastCallAndVisible(game.getId(), lastCall, true);
-        bets.stream().forEach(b -> b.setBetable(false));
-        return betRepository.save(bets);
-    }
-    
-    private void startGame(Game game, EventDto eventDto) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
-        Collection<Bet> bets = updateBets(game, BetLastCall.GAME_START);
+    private void startGame(Game game, EventDto eventDto) {
+        updateBets(game, BetLastCall.GAME_START);
         // cancel group bets which were not fully accepted before game start
         couponService.cancelUnacceptedGroupCoupons(game.getId());
         // update status
@@ -108,9 +104,10 @@ public class GameEventHandler {
         createGamePart(game, eventDto);
     }
 
-    private void endGame(Game game, EventDto eventDto) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, ScriptException {
-        Collection<Bet> bets = updateBets(game, BetLastCall.GAME_END);
-        GameScore gs = gameScoreRepository.findTopByGameIdOrderByTimeDesc(game.getId()).orElseThrow(() -> new RuntimeException()); // TODO custom exception
+    private void endGame(Game game, EventDto eventDto) throws IllegalAccessException, InvocationTargetException, ScriptException {
+        updateBets(game, BetLastCall.GAME_END);
+        GameScore gs = gameScoreRepository.findTopByGameIdOrderByTimeDesc(game.getId())
+                .orElseThrow(() -> new RuntimeException("no game score found for game with id = " + game.getId()));
         game.setEndTime(eventDto.getTime());
         game.setStatus(GameStatus.ENDED);
         game.setGameFinalScore(gs);
