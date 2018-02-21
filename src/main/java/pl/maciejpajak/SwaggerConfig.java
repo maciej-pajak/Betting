@@ -24,8 +24,9 @@ public class SwaggerConfig {
     }
 
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("Simple Post and Tags App with swagger")
-                .description("Boot Demo with Swagger")
+        return new ApiInfoBuilder()
+                .title("Betting API")
+                .description("Betting API with Swagger")
                 .version("1.0.0").build();
     }
 }
